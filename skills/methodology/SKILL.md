@@ -45,7 +45,11 @@ execution rather than treated as unrelated pipelines.
 ```text
 user-spec-planning → explicit approval → a follow-up task: implement the approved spec
 → verified implementation commit → documentation-writing feature finalization
+→ squashed integration into the shared branch
 ```
+
+Planning and implementation commits are local. The shared branch receives one squashed commit per
+feature, so `work/` planning artifacts never enter shared history.
 
 ### Plan the Feature
 
@@ -95,9 +99,10 @@ skills. When observable behavior changes, `test-master` selects the smallest rel
 that reproduces each meaningful risk; it does not create tests for artifacts with no contract to
 protect.
 
-The user-spec template requires the verified implementation to be committed separately before
-feature finalization. `decisions.md` receives only material decisions or deviations that need to
-survive the current context.
+The verified implementation is committed separately in local history before feature finalization;
+squashed integration collapses these local commits into the single commit the shared branch
+receives. `decisions.md` receives only material decisions or deviations that need to survive the
+current context: it is created by its first such entry and never exists as an empty file.
 
 ### Finalize the Feature
 
@@ -105,11 +110,16 @@ Feature finalization is an explicit mode of `documentation-writing`. The user id
 `work/{feature}/` and asks to finish or finalize it; no wrapper command file is required.
 
 The skill reads the spec, decisions, implementation, and relevant Git history; checks whether the
-feature is evidently complete; updates only affected durable Project Knowledge; removes active
-links that still treat the feature folder as current; moves it to
-`work/completed/{feature}/`; and commits the documentation and archive change. If Project
-Knowledge is missing, the documentation update is skipped but archival and finalization may still
-continue.
+feature is evidently complete; updates only affected durable Project Knowledge; moves deferred or
+rejected scope that is not covered by the agreed spec into the project's backlog, marking each item
+with the feature it came from and asking the user when the project has no backlog convention;
+removes active links that still treat the feature folder as current; keeps only `user-spec.md` and
+`decisions.md` (when it holds material entries) in `work/completed/{feature}/`; removes the
+remaining feature artifacts (`code-research.md`, `split-context.md`, and other intermediates) from
+the worktree, staging the deletions of tracked files in the same commit; and commits the
+documentation and archive change. The archive holds the approved contract and its decisions instead
+of the planning trail. If Project Knowledge is missing, the documentation update is skipped but
+archival and finalization may still continue.
 
 This is the only documentation mode that reads feature artifacts by default, archives a feature,
 or creates a finalization commit. A normal documentation update or audit does none of those.
@@ -173,14 +183,16 @@ artifacts are evidence rather than owners of current project state.
 work/{feature}/
 ├── user-spec.md
 ├── code-research.md
-├── decisions.md
+├── decisions.md        # created by the first material decision or deviation
 └── logs/
     ├── userspec/
     │   └── interview.yml
     └── working/
 ```
 
-Completed features move to `work/completed/{feature}/`. Planning templates, interview state, and
+Completed features keep only `user-spec.md` and, when it holds material entries, `decisions.md`, and
+move to `work/completed/{feature}/`; the interview log, `code-research.md`, and working logs are
+removed at finalization. Planning templates, interview state, and
 the initializer script are bundled inside `user-spec-planning`; new-project templates are bundled
 inside `project-initialization`. There is no shared resource directory between skills.
 
@@ -274,3 +286,8 @@ spoken.
   finding never expands authorization.
 - **Stable commits:** commit meaningful states such as a draft spec, approved spec, verified
   implementation, or finalized documentation; do not force incidental state into a commit.
+- **Local intermediates, squashed integration:** local commits may carry the planning trail;
+  `dev` and `main` receive one squashed commit per feature. Never push a branch whose history
+  contains `work/` planning artifacts — squash-merge does not remove objects already pushed. To
+  publish work for review before merging, build a single-commit branch from the current `dev`
+  carrying only the finalized tree.

@@ -20,4 +20,5 @@
 - NEVER ask user to write secrets in chat. Instead, provide instructions where to store them securely (local `.env`/config files; CI/CD: GitHub Actions secrets).
 - ALWAYS ask before pushing to main.
 - ALWAYS add secrets to `.gitignore`: `.env`, `*.key`, `credentials.json`, `secrets/`.
+- Integrate by squash only: `dev` and `main` receive one squashed commit per feature. NEVER push a branch whose history contains tracked `work/` planning artifacts — squash-merge does not remove objects already pushed.
 - Be cautious with external actions (push, deploy, send messages, create PRs). Ask before acting externally when uncertain.

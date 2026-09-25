@@ -33,7 +33,7 @@ backlog.md            # Feature ideas and bugs (what to do later)
 .env.example          # Placeholder for the required environment variable names
 work/
 ├── [feature]/        # Active feature or bug: one user-spec.md each
-└── completed/.gitkeep  # Finished features, archived after their docs are finalized
+└── completed/.gitkeep  # Finished features: user-spec.md, plus decisions.md when it has entries
 ```
 
 Your source code goes wherever you want it — this scaffold only fixes the paths above.

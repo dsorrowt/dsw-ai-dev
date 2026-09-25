@@ -135,11 +135,24 @@ Do not search for `user-spec.md` or require it outside feature-finalization mode
 3. Update only affected Project Knowledge through Phases 2-3 and Documentation Review. If Project
    Knowledge is missing, report that the documentation update was skipped and continue archival
    and finalization.
-4. Remove active Project Knowledge and backlog links that treat `work/{feature}/` as a current
+4. Move deferred or rejected scope that survived `logs/userspec/interview.yml` but is not covered by
+   the agreed spec into the project's backlog, marking each item with the feature it came from
+   (`from: {feature}`). When the project has no backlog or no backlog convention, ask the user where
+   to record it instead of inventing a second convention. An item that exists only in the interview
+   log is routed before that log is removed.
+5. Remove active Project Knowledge and backlog links that treat `work/{feature}/` as a current
    source; do not add current operational inventory to completed artifacts.
-5. Move `work/{feature}/` to `work/completed/{feature}/` after documentation review.
-6. Commit the Project Knowledge changes and archive move with a concise documentation commit, then
-   report the updated files and completed-feature path.
+6. Archive after documentation review: move `user-spec.md` and `decisions.md` (only when it holds
+   material entries) to `work/completed/{feature}/`, and remove the remaining feature artifacts —
+   `code-research.md`, `split-context.md`, and any other intermediate file — from the worktree.
+   The approved spec and decisions are the only artifacts a completed feature keeps; everything
+   else is planning trail, not an archive.
+7. Stage the deletions of tracked files in the same commit as the Project Knowledge changes, commit
+   with a concise documentation message, and report the updated files and completed-feature path. A
+   finalization commit that leaves tracked artifacts in the worktree or stages them as still
+   present is incomplete. An artifact that is untracked — `work/{feature}/logs/` is ignored by the
+   project `.gitignore` in projects created from the bundled template — has nothing to stage; remove
+   it from the worktree and do not force-add it.
 
 This is the only mode that reads feature artifacts by default, archives a feature, or creates the
 finalization commit.

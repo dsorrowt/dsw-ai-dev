@@ -12,9 +12,11 @@ type: feature
 # User-spec: [feature/fix name]
 
 > **Executor instruction.** If the project has Project Knowledge, first read its main `SKILL.md`,
-> then only the materials it routes to for this task. Read `decisions.md` if it exists. Work from
-> the root of the project this spec belongs to. Implement the entire user-spec. Use the execution
-> skills appropriate to the work.
+> then only the materials it routes to for this task. Read `decisions.md` if it exists. Record a
+> material decision or deviation from this spec in `decisions.md` when the first one appears — what
+> was decided, why, and what it changes relative to this spec — and never create or leave an empty
+> `decisions.md`. Work from the root of the project this spec belongs to. Implement the entire
+> user-spec. Use the execution skills appropriate to the work.
 
 ## What We Are Building
 [2–3 sentences describing the feature or fix]

@@ -43,6 +43,10 @@ create or fill it through `documentation-writing`.
 If the user explicitly asks to continue an existing user spec and provides its feature folder or
 slug:
 
+If that folder is absent while `work/completed/{feature}/` holds the same slug, the feature was
+finalized: read the archived `user-spec.md` and `decisions.md`, treat the request as a revision of
+that outcome, and plan it in a new `work/{slug}` folder instead of re-creating the archived one.
+
 1. Use that exact `work/{feature}` directory. Do not search for other interviews.
 2. Read `logs/userspec/interview.yml` and the existing feature artifacts. Treat any additions or
    changes in the current request as interview input.
@@ -66,7 +70,10 @@ Otherwise start a new spec:
    the same folder or create the new spec under another slug. If the user chooses the existing
    folder, follow the resume path above. Never overwrite prior work implicitly.
 4. Resolve the directory of this loaded `user-spec-planning` skill, then from the target project
-   root run its `scripts/init-feature-folder.sh` with `{slug}`. Initialize the interview metadata
+   root run its `scripts/init-feature-folder.sh` with `{slug}`. The script creates `user-spec.md`,
+   `logs/userspec/interview.yml`, and `logs/working/` only. Create `decisions.md` later, from
+   `assets/decisions.md.template`, when the first material decision or deviation appears — an empty
+   `decisions.md` must never exist. Initialize the interview metadata
    with the start time, last-update time, and `in_progress` status, then begin the interview.
 
 If at any point the request appears to contain several independently valuable outcomes, explain

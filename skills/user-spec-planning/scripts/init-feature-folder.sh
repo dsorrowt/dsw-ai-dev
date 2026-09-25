@@ -9,10 +9,12 @@
 # Creates:
 #   work/{feature-name}/
 #     user-spec.md          (from template)
-#     decisions.md          (from template or header)
 #     logs/userspec/
 #       interview.yml       (from template)
 #     logs/working/
+#
+# decisions.md is created later, by the first material decision or deviation, from
+# assets/decisions.md.template.
 
 set -euo pipefail
 
@@ -39,7 +41,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 ASSETS_DIR="$SKILL_DIR/assets"
 INTERVIEW_TEMPLATE="$ASSETS_DIR/interview.yml.template"
-DECISIONS_TEMPLATE="$ASSETS_DIR/decisions.md.template"
 USER_SPEC_TEMPLATE="$ASSETS_DIR/user-spec.md.template"
 FEATURE_DIR="$WORK_DIR/$FEATURE_NAME"
 TODAY=$(date +%Y-%m-%d)
@@ -76,15 +77,7 @@ if [[ ! -f "$FEATURE_DIR/user-spec.md" ]]; then
       "$USER_SPEC_TEMPLATE" > "$FEATURE_DIR/user-spec.md"
 fi
 
-# decisions.md
-if [[ ! -f "$FEATURE_DIR/decisions.md" ]]; then
-  if [[ -f "$DECISIONS_TEMPLATE" ]]; then
-    sed -e "s|{Feature Name}|$FEATURE_NAME_SED|g" \
-        "$DECISIONS_TEMPLATE" > "$FEATURE_DIR/decisions.md"
-  else
-    echo "# Decisions: $FEATURE_NAME" > "$FEATURE_DIR/decisions.md"
-  fi
-fi
+# decisions.md is created on demand by the first material decision or deviation, never here.
 
 # interview.yml (from template)
 if [[ ! -f "$FEATURE_DIR/logs/userspec/interview.yml" ]]; then

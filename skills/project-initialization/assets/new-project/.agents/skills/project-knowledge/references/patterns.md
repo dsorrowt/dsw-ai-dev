@@ -31,6 +31,12 @@ SCALING HINT: If this section grows beyond ~80 lines, extract to references/git-
 - **`main`** - Production-ready code (protected). Only merge from `dev` after full testing. Triggers production deployment.
 - **`dev`** - Active development. All work happens here. Triggers staging deployment.
 
+### Integration
+
+- Feature branches are local: planning and implementation commits, including tracked `work/` artifacts, stay in the local clone.
+- `dev` and `main` receive one squashed commit per feature. Never push a branch whose history contains tracked `work/` planning artifacts (code research, split context, and other intermediates) — squash-merge does not remove objects from a branch that was already pushed.
+- To publish work for review before merging, build a single-commit branch from the current `dev` that carries only the finalized tree, and push that branch instead.
+
 ### Testing Requirements
 
 - **On commit:** Run the smallest checks that cover the changed behavior. When there is no test
