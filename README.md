@@ -2,129 +2,121 @@
 
 # AI-First Development Framework
 
-**Plan → approve → implement → verify → review → finalize, with agents.**
+**Plan → approve → implement → verify → review → finalize.**
 
-[![MIT](https://img.shields.io/badge/license-MIT-3ddc97.svg)](LICENSE) [![omp · pi · orca](https://img.shields.io/badge/runtimes-omp%20%C2%B7%20pi%20%C2%B7%20orca-6d7cff.svg)](#what-runs-where) [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-29d3ee.svg)](#install) [![13 skills](https://img.shields.io/badge/agent%20skills-13-8b5cf6.svg)](#whats-inside) [![15 reviewers](https://img.shields.io/badge/reviewers-14%20%2B%201%20researcher-f472b6.svg)](#whats-inside)
+[![MIT](https://img.shields.io/badge/license-MIT-3ddc97.svg)](LICENSE) [![omp · pi · orca](https://img.shields.io/badge/runtimes-omp%20%C2%B7%20pi%20%C2%B7%20orca-6d7cff.svg)](#runtimes) [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-29d3ee.svg)](#installation) [![13 skills](https://img.shields.io/badge/agent%20skills-13-8b5cf6.svg)](#contents) [![14 reviewers + 1 researcher](https://img.shields.io/badge/reviewers-14%20%2B%201%20researcher-f472b6.svg)](#contents)
 
-A compact, runtime-first workflow for building software with coding agents.
-Fork of [molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev).
+A compact workflow for software development with coding agents, designed around **omp**, **pi**, and **orca**.
+
+A fork of [molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev).
 
 </div>
 
----
-
-## The methodology in one screen
-
-```mermaid
-flowchart LR
-    plan[Plan] --> implement[Implement] --> verify[Verify] --> review[Review] --> finalize[Finalize]
-    plan -.->|feature path| spec[Agreed user-spec]
-    spec -.-> implement
-```
-
-| Step | Owning skill | Produces | Stops when |
-|---|---|---|---|
-| **Plan** | `user-spec-planning` | `work/{feature}/user-spec.md`, interview log, code research | the user approves the spec, after validation by `fw-uspec-quality`, `fw-uspec-adequacy`, `fw-skeptic` |
-| **Implement** | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` | the agreed change only, checked at the smallest reliable boundary chosen by `test-master` | observable behavior matches the spec, and the verified state is committed |
-| **Review** | `code-reviewing` + the fresh `fw-*` reviewers | evidence-gated findings per the shared [reviewer contract](skills/methodology/references/reviewer-contract.md) | no unaddressed material finding; corrections only when the request or spec authorizes them |
-| **Finalize** | `documentation-writing` | updated Project Knowledge, feature moved to `work/completed/{feature}/` | Project Knowledge matches the code and the feature is archived |
-
-**Three sources of truth.** The approved `user-spec.md` owns the agreed feature outcome; Project
-Knowledge owns durable project facts; the code owns implementation detail. A finding is a diagnosis,
-never a work queue — the orchestrator applies only an authorized correction.
-
-**Three cross-cutting pieces.** `methodology` maps the process; `project-initialization` creates a
-repository from the bundled template; `security-auditor` supplies review criteria for security work.
-
-## Install
-
-> [!NOTE]
-> One-time, per-machine step. Nothing is recorded on disk — the source tree is the state, so a
-> repeated `install` is the drift check.
+## Quick start
 
 ```bash
 git clone https://github.com/dsorrowt/dsw-ai-dev.git
 cd dsw-ai-dev
-python3 scripts/fw-install.py install               # copy skills/** and agents/fw-*.md
-python3 scripts/fw-install.py uninstall --dry-run  # print the plan, change nothing
-python3 scripts/fw-install.py uninstall            # delete the copies the sources describe
+python3 scripts/fw-install.py install
 ```
 
-Copies land in `~/.agents/skills/` and `~/.omp/agent/agents/`; exit codes are `0` done, `2` refused
-or failed, `3` nothing installed.
+The installer copies skills to `~/.agents/skills/` and agent wrappers to
+`~/.omp/agent/agents/`. To preview an uninstall without changing anything:
 
-<details>
-<summary><b>Safety contract</b></summary>
+```bash
+python3 scripts/fw-install.py uninstall --dry-run
+```
 
-- `install` copies missing files and rewrites anything that differs from its source; it refuses
-  before writing anything when a destination is a symlink, a directory, or sits behind a file.
-- Writes go through a directory chain opened without following symlinks and land via `os.replace`,
-  so a symlink swapped in mid-run cannot redirect them.
-- `uninstall` deletes exactly the copies the sources describe, keeps content the plan does not name,
-  and removes the directories below the managed roots that become empty. A re-run finishes an
-  interrupted uninstall; a symlinked or unparsable source tree refuses the run.
-- A copy whose source was deleted from the tree, and an edit to an installed copy, are not
-  preserved: the next command replaces or removes them.
-- No automatic backup. Optional insurance:
-  `tar -C ~/.agents -czf ~/agents-skills-backup.tgz skills`.
+The installer creates no manifest or ledger: the source tree is the only state. A repeated
+`install` reconciles differences between the sources and installed copies.
 
-</details>
+## How the workflow works
 
-## What's inside
+```text
+  Plan ──▶ Implement ──▶ Verify ──▶ Review ──▶ Finalize
+             ▲
+             └─ approved user-spec (feature path)
+```
 
-**13 Agent Skills** — each owns its `SKILL.md`, optional `references/`, deterministic `scripts/`,
-and output `assets/`, so packages stay portable instead of reaching into global directories.
+| Stage | Owner | Result | Gate |
+|---|---|---|---|
+| **Plan** | `user-spec-planning` | specification, interview log, code research | the user approves the spec after `fw-uspec-quality`, `fw-uspec-adequacy`, and `fw-skeptic` review it |
+| **Implement** | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` | only the agreed changes | observable behavior matches the specification |
+| **Verify** | `test-master` and the appropriate smoke/integration/unit boundary | evidence of the result | the changed path has actually been exercised |
+| **Review** | `code-reviewing` and fresh `fw-*` reviewers | evidence-gated findings | no material finding remains unaddressed |
+| **Finalize** | `documentation-writing` | current Project Knowledge and archived feature artifacts | documentation matches the code |
+
+Three sources of truth stay separate: the approved `user-spec.md` defines the expected feature
+outcome, Project Knowledge stores durable project facts, and code owns implementation details. A
+finding is a diagnosis, not an automatically generated task.
+
+## Installation and safety
+
+`fw-install.py` supports only `install` and `uninstall [--dry-run]`. Exit codes are `0` for
+success, `2` for refusal or failure, and `3` when there is nothing to uninstall.
+
+- `install` creates missing copies and overwrites copies that differ from their sources.
+- Symlinks, directories at file paths, and incomplete source trees are rejected before writing.
+- `uninstall` removes only files described by the current sources and preserves unrelated content.
+- Backups are not created automatically. Create one separately before installation if needed.
+
+Preview the uninstall plan:
+
+```bash
+python3 scripts/fw-install.py uninstall --dry-run
+```
+
+## Contents
+
+### 13 Agent Skills
 
 | Area | Skills |
 |---|---|
 | Process | `methodology`, `project-initialization` |
 | Planning | `user-spec-planning`, `documentation-writing` |
-| Execution | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` |
+| Implementation | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` |
 | Quality | `test-master`, `code-reviewing`, `layout-reviewing`, `security-auditor` |
 
-**15 agent wrappers** (`agents/fw-*.md`) — 14 reviewers and one researcher. A reviewer wrapper adds
-fresh isolated context, a bounded skeptical role, and the minimum tools needed to inspect evidence;
-`fw-code-researcher` instead gathers code evidence for planning and writes `code-research.md`. The
-model of any wrapper comes from runtime configuration, never from the caller. All 14 reviewers read
-one shared [reviewer contract](skills/methodology/references/reviewer-contract.md) — stance, result
-schema, severity scale, review-wave ceiling, and findings rules live there once, and the contract
-lists exactly those 14 roles.
+### 15 agent wrappers
 
-### What runs where
+`agents/fw-*.md` contains **14 reviewers and one researcher**. Each reviewer gets fresh isolated
+context, a bounded role, and a minimal tool set. All 14 reviewers use the shared
+[reviewer contract](skills/methodology/references/reviewer-contract.md).
+`fw-code-researcher` gathers evidence for planning and writes `code-research.md`.
+
+## Runtimes
 
 | Capability | omp | pi | orca |
 |---|---|---|---|
-| Skills | `~/.agents/skills/` after install | same user location; project skills need trust | shares skill bundles |
-| Agent layer | `~/.omp/agent/agents/` after install | no subagents | separate worker processes |
-| Project context | `AGENTS.md` | `AGENTS.md`, no trust step | — |
-| Orchestration | in-session `task` tool | orca worker required for fresh context | worktrees, terminals, handoffs |
+| Skills | `~/.agents/skills/` after installation | same location; project skills require trust | shared bundles |
+| Agent layer | `~/.omp/agent/agents/` after installation | no subagents | separate worker processes |
+| Project context | `AGENTS.md` | `AGENTS.md` and trust | — |
+| Orchestration | in-session `task` | an orca worker is needed for fresh context | worktrees, terminals, handoffs |
 
-**One step, one orchestrator.** Either the in-session `task` tool or an orca worker — never both:
-neither runtime documents the semantics of mixing them.
+Choose one orchestrator per step: the in-session `task` tool **or** an orca worker, never both.
+pi does not launch subagents itself. Wrapper model selection comes from runtime configuration,
+not from the wrapper.
 
-<details>
-<summary><b>Boundaries and limitations</b></summary>
+## Boundaries
 
-- pi has no subagents; independent review and cross-runtime handoffs need an orca worker.
-- Project `.agents/skills/` in pi requires a trust decision; omp wrappers need the global install.
-- The optional template MCP config ships unpinned on purpose: review it and pin an exact package
-  version before enabling it.
-- Routing may name skills the runtime supplies (`code-review`, `update-skills`) rather than this
+- `work/` contains local process artifacts and is ignored by git.
+- The project template includes `.omp/mcp.json`; review it and pin an exact package version before
+  enabling it.
+- A runtime may provide additional skills (`code-review`, `update-skills`) that are not in this
   repository.
-- The local process documents under `work/` are git-ignored and are not part of the published fork.
-
-</details>
+- `project-initialization` creates a project from the bundled template and can register it in Orca;
+  worktrees, terminals, and handoffs remain Orca responsibilities.
 
 ## Repository map
 
 ```text
-skills/       Agent Skills: process, planning, execution, quality
-agents/       15 fw-* wrappers for omp: 14 reviewers + 1 code researcher
-scripts/      fw-install.py — install and uninstall, no state file
-AGENTS.md     Repository context: language, behavior, scope, worktrees, security
+skills/       13 Agent Skills: process, planning, implementation, quality
+agents/       15 fw-* wrappers: 14 reviewers + 1 code researcher
+scripts/      fw-install.py — stateless install/uninstall
+AGENTS.md     language, behavior, scope, worktree, and security rules
 ```
 
 ## License
 
-MIT © 2024 [Pavel Molyanov](https://molyanov.ru) — upstream author of
-[molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev). Full text in [LICENSE](LICENSE).
+MIT © 2024 [Pavel Molyanov](https://molyanov.ru), author of the original
+[molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev). Full text: [LICENSE](LICENSE).
