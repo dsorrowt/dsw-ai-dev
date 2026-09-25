@@ -1,35 +1,35 @@
 # Optional Frontmatter Fields
 
-These fields are NOT required for most skills. Use only when needed.
+A skill needs only `name` and `description`. `disable-model-invocation` is the single field that
+changes how a runtime selects a skill; no other optional field belongs in a skill of this framework.
 
-## Field Reference
+## Fields the runtimes read
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `argument-hint` | None | Autocomplete hint shown after skill name |
-| `disable-model-invocation` | `false` | If `true`, skill only triggers manually via `/skill-name` |
-| `user-invocable` | `true` | If `false`, skill hidden from `/` menu, only Claude can invoke |
-| `allowed-tools` | All tools | Restrict which tools the skill can use |
-| `model` | `inherit` | Override model: `sonnet`, `opus`, `haiku`, `inherit` |
+| Runtime | Recognized in `SKILL.md` |
+|---------|--------------------------|
+| omp | `name`, `description`, `globs`, `alwaysApply`, `hide`, `disableModelInvocation` (the kebab-case spelling `disable-model-invocation` is normalized to it) |
+| pi (Agent Skills) | `name`, `description`, `disable-model-invocation` |
 
-## When to Use Each Field
+Every other key is outside both contracts: omp keeps it as unknown metadata and acts on none of it,
+and no pi Agent Skills field reads it. The Claude Code contract is therefore not portable and must
+not appear in a skill:
 
-### argument-hint
+- `allowed-tools` — supported by neither runtime; it does not restrict the skill's tool set.
+- `user-invocable` — supported by neither runtime; it does not hide a skill from any menu.
+- `argument-hint` — supported by neither runtime; it renders no autocomplete hint.
 
-Shows hint in autocomplete to guide user input.
+`globs` and `alwaysApply` are recognized by omp, but their behavior is undocumented, so the
+framework's skills do not use them.
 
-```yaml
----
-name: fix-issue
-argument-hint: "[issue-number]"
----
-```
+### `disable-model-invocation`
 
-User sees: `/fix-issue [issue-number]`
+The only field that turns skill selection off. In omp, `disableModelInvocation: true` (equivalent to
+`hide: true`) removes the skill from the skill list the model sees. In pi, the same field removes
+the skill from the model's automatic selection. Neither runtime unloads the skill: it stays
+reachable explicitly — `skill://<name>` and `/skill:<name>` in omp, `/skill:name` in pi.
 
-### disable-model-invocation
-
-Prevents Claude from auto-triggering the skill. Only manual `/skill-name` works.
+Write the kebab-case spelling: it is the spelling pi's Agent Skills contract uses, and omp
+normalizes it to `disableModelInvocation`, so one line disables model invocation in both runtimes.
 
 ```yaml
 ---
@@ -38,49 +38,13 @@ disable-model-invocation: true
 ---
 ```
 
-Use for: destructive operations, expensive API calls, operations requiring explicit user consent.
+Use for: manual-only skills, destructive or expensive operations that need explicit user consent,
+and duplicate skills whose function is already covered by another skill.
 
-### user-invocable
+### model — not supported
 
-Hides skill from `/` menu. Only Claude can invoke it programmatically.
-
-```yaml
----
-name: internal-helper
-user-invocable: false
----
-```
-
-Use for: helper skills that shouldn't appear in user-facing menu, internal utilities.
-
-### allowed-tools
-
-Restricts which tools the skill can access.
-
-```yaml
----
-name: read-only-analyzer
-allowed-tools: Read, Grep, Glob
----
-```
-
-Use for: read-only analysis skills, security-conscious operations, preventing accidental edits.
-
-### model
-
-Overrides the model used for this skill.
-
-```yaml
----
-name: quick-lookup
-model: haiku
----
-```
-
-Options:
-- `inherit` — use orchestrator's model (default, recommended)
-- `sonnet` — fast, good for most tasks
-- `opus` — best quality, use for complex reasoning
-- `haiku` — fastest, use for simple lookups
-
-Use sparingly. `inherit` is usually best.
+Neither runtime reads a `model` field from `SKILL.md`: omp recognizes only `name`, `description`,
+`globs`, `alwaysApply`, `hide`, `disableModelInvocation` and keeps other keys as unknown metadata;
+pi follows the Agent Skills field list, which has no model field. Never name a model in a skill. When
+a step needs a class of model, name the class (`fast` or `good`) in prose — see the `methodology`
+skill, "Model classes"; the class is bound to a concrete model in runtime configuration.

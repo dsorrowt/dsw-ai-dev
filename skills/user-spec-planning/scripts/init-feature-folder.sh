@@ -26,6 +26,14 @@ if [[ -z "$FEATURE_NAME" ]]; then
   exit 1
 fi
 
+# Strict slug check before any filesystem work: one rule rejects path traversal, path
+# separators, whitespace, and sed metacharacters. The documented contract is a kebab-case slug.
+if [[ ! "$FEATURE_NAME" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+  echo "Error: feature-name must be a kebab-case slug: lowercase letters and digits separated by" >&2
+  echo "single dashes (e.g., 'add-auth'); no spaces, slashes, dots, or other characters." >&2
+  exit 1
+fi
+
 # --- Paths ---
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
@@ -53,17 +61,25 @@ mkdir -p "$FEATURE_DIR/logs/working"
 
 # --- Copy and fill templates (only if file doesn't already exist) ---
 
+# Escape the replacement side of s||| so template filling never interprets caller-supplied
+# text as sed syntax, even though the slug check above already restricts the charset.
+sed_escape_replacement() {
+  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
+}
+FEATURE_NAME_SED="$(sed_escape_replacement "$FEATURE_NAME")"
+TODAY_SED="$(sed_escape_replacement "$TODAY")"
+
 # user-spec.md
 if [[ ! -f "$FEATURE_DIR/user-spec.md" ]]; then
-  sed -e "s/\[DATE\]/$TODAY/g" \
-      -e "s/\[feature\/fix name\]/$FEATURE_NAME/g" \
+  sed -e "s|\[DATE\]|$TODAY_SED|g" \
+      -e "s|\[feature/fix name\]|$FEATURE_NAME_SED|g" \
       "$USER_SPEC_TEMPLATE" > "$FEATURE_DIR/user-spec.md"
 fi
 
 # decisions.md
 if [[ ! -f "$FEATURE_DIR/decisions.md" ]]; then
   if [[ -f "$DECISIONS_TEMPLATE" ]]; then
-    sed -e "s/{Feature Name}/$FEATURE_NAME/g" \
+    sed -e "s|{Feature Name}|$FEATURE_NAME_SED|g" \
         "$DECISIONS_TEMPLATE" > "$FEATURE_DIR/decisions.md"
   else
     echo "# Decisions: $FEATURE_NAME" > "$FEATURE_DIR/decisions.md"

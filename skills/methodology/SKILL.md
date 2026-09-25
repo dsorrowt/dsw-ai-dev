@@ -2,8 +2,8 @@
 name: methodology
 description: |
   Explains the current AI-First development methodology: skill routing, Project Knowledge,
-  user-spec planning and execution, evidence-gated reviews, feature finalization, and the
-  Claude/Codex dual runtime.
+  user-spec planning and execution, evidence-gated reviews, reviewer roles, feature finalization,
+  and model classes.
 
   Use when: "изучи методологию", "как работает пайплайн", "как делать фичи",
   "как устроены скиллы", "how does the methodology work", "explain the workflow"
@@ -21,10 +21,10 @@ or the user.
 
 ## Operating Model
 
-Requests route directly to skills by intent. The global `commands/` source is currently empty;
-feature planning, direct execution, initialization, documentation, and finalization do not depend
-on command wrapper files. Request the workflow in plain language; historical shorthand such as
-`/new-user-spec` or `/done` does not imply that an installed slash-command wrapper exists.
+Requests route directly to skills by intent. Feature planning, direct execution, initialization,
+documentation, and finalization do not depend on command wrapper files. Request the workflow in
+plain language; historical shorthand such as `/new-user-spec` or `/done` does not imply that an
+installed slash-command wrapper exists.
 
 Choose the smallest path that fits the work:
 
@@ -43,7 +43,7 @@ execution rather than treated as unrelated pipelines.
 ## Planned Feature Lifecycle
 
 ```text
-user-spec-planning → explicit approval → new task: implement the approved spec
+user-spec-planning → explicit approval → a follow-up task: implement the approved spec
 → verified implementation commit → documentation-writing feature finalization
 ```
 
@@ -54,20 +54,22 @@ user-spec-planning → explicit approval → new task: implement the approved sp
 1. Start or resume `work/{feature}/logs/userspec/interview.yml`. Ask 3–4 questions per batch and
    run as many batches as the actual gaps require; there is no fixed number of interview cycles.
 2. Load the Project Knowledge router when it exists and follow only the routes relevant to the
-   feature. Missing Project Knowledge does not block feature planning.
-3. Once the intended outcome is clear enough, run `code-researcher`, write
+   feature. Missing Project Knowledge never blocks planning; it does block implementation work that
+   needs it as operating context (for example `infrastructure-setup`), which stops and asks the user
+   to create or fill it through `documentation-writing`.
+3. Once the intended outcome is clear enough, run `fw-code-researcher`, write
    `work/{feature}/code-research.md`, and use code evidence in the remaining interview.
-4. Run fresh `interview-completeness-checker` instances until the agreed scope has no substantive
+4. Run fresh `fw-uspec-interview-checker` instances until the agreed scope has no substantive
    requirements gap. A finding that would expand the feature returns to the user for a decision.
 5. Fill the bundled user-spec template in place. Keep its scaffold in English, write its content
    in the user's language, preserve the executor instruction, and commit the draft.
 6. Validate every round in parallel with:
-   - `userspec-quality-validator` for document quality, coverage, and testable criteria;
-   - `userspec-adequacy-validator` for feasibility, proportionality, and architecture fit;
-   - `skeptic` for factual claims about the current codebase.
+   - `fw-uspec-quality` for document quality, coverage, and testable criteria;
+   - `fw-uspec-adequacy` for feasibility, proportionality, and architecture fit;
+   - `fw-skeptic` for factual claims about the current codebase.
 7. Stop when all lanes are clean or after the third validation round. Obtain explicit user
    approval, set the spec and interview statuses, commit the approval, and return the absolute
-   user-spec path for a new task.
+   user-spec path for a follow-up task.
 
 If the request contains independently valuable outcomes, planning proposes a split and waits for
 the user's choice. Different files, code layers, or execution skills alone do not require separate
@@ -126,9 +128,9 @@ to the user for a decision.
 
 ## New Projects and Project Knowledge
 
-`project-initialization` creates a dual-runtime repository from its bundled template, preserves
+`project-initialization` creates a repository from its bundled template, preserves
 pre-existing files in the next available `old*` directory,
-configures Git hooks, creates the initialization commit, connects a private GitHub
+creates the initialization commit, connects a private GitHub
 repository, creates `main` and `dev`, and leaves `dev` active. Reviewing or merging preserved
 `old*` files is separate work.
 
@@ -137,7 +139,7 @@ derives what it can from the repository, uses as many question batches as needed
 checkpoint agreement for project definition, architecture, and operations/experience, proposes a
 documentation topology when one is not already established, and writes durable facts in English.
 
-Project Knowledge lives in `.claude/skills/project-knowledge/`, whose `SKILL.md` is always the
+Project Knowledge lives in `.agents/skills/project-knowledge/`, whose `SKILL.md` is always the
 router. Use structure by context boundary rather than file size:
 
 - compact projects may keep Project, Architecture, Patterns, Deployment, and applicable UX or
@@ -147,8 +149,9 @@ router. Use structure by context boundary rather than file size:
 - `ux-guidelines.md` or domain references are added only when they form independently useful
   loading boundaries.
 
-`CLAUDE.md` remains a compact entrypoint: project identity, Project Knowledge route, backlog path,
-and default branch. It does not duplicate detailed project facts.
+`AGENTS.md` stays a compact entry rulebook for agents — language, behavior, task scope, worktrees,
+and security — instead of a project fact sheet. Project Knowledge lives in
+`.agents/skills/project-knowledge/`, whose `SKILL.md` router is the route to the right reference.
 
 ## Sources of Truth
 
@@ -197,41 +200,68 @@ inside `project-initialization`. There is no shared resource directory between s
 | Code, layout, and security review criteria | `code-reviewing`, `layout-reviewing`, `security-auditor` |
 
 A skill package owns its optional `references/`, deterministic `scripts/`, and output
-`assets/`. This keeps dependencies portable through Claude-to-Codex conversion and public
-publication instead of relying on unrelated global directories.
+`assets/`. This keeps dependencies portable across installations and public publication instead of
+relying on unrelated global directories.
 
 ## Review Model
 
-Reusable methodology lives in skills. Dedicated reviewer agents add fresh isolated context, a
-bounded skeptical role, the minimum tools needed to inspect evidence, and a structured diagnostic
-result. They inherit the orchestrator's model without a caller override. They do not edit
-artifacts, design remediation, or decide whether work ships.
+Reusable methodology lives in skills. Dedicated `fw-*` reviewer agents add fresh isolated context,
+a bounded skeptical role, the minimum tools needed to inspect evidence, and a structured diagnostic
+result. Their model comes from runtime configuration, never from the caller; reviewer roles run in
+the `good` class. They do not edit artifacts, design remediation, or decide whether work ships. The
+shared stance, result schema, review-loop limit, and findings handling are defined once in
+[references/reviewer-contract.md](references/reviewer-contract.md), which every reviewer reads
+before reporting. Its "Review waves" and "Findings are diagnoses, not a work queue" sections carry
+the shared wave mechanics and the findings rules — the complete-set wave, the wave counts, the
+stop rules, the diagnose-then-authorize sequence — so no skill restates them.
 
 A finding is valid only when it establishes a concrete location, observed evidence, violated
-requirement, realistic triggering conditions, and impact. A clean result is valid. The
-orchestrator evaluates every result and may apply a correction only when that exact correction is
-inside the user request, approved plan, or user-spec.
-
-Before the first review, the orchestrator selects the complete reviewer set required by all active
-skills. The set reviews the same revision in parallel as one wave; active skills do not create
-independent wave sequences. A correction that changes the reviewed result may trigger a fresh
-wave, subject to the owning workflow's limit. Implementation and writing workflows normally allow
-at most two waves; user-spec validation allows at most three rounds.
+requirement, realistic triggering conditions, and impact — the contract's evidence gate. A clean
+result is valid. The orchestrator applies only an authorized correction, one inside the user
+request, approved plan, or user-spec, exactly as the contract's findings rule states.
 
 Common reviewer ownership is:
 
-- every completed code implementation: `code-reviewer`;
-- layout implementation: `layout-reviewer` with prepared source and rendered evidence;
-- meaningful test-code changes: `test-reviewer` through `test-master`;
-- changed security boundaries or an explicit security request: `security-auditor`;
-- documentation edits: `documentation-reviewer`;
-- material infrastructure work or an explicit infrastructure review: `infrastructure-reviewer`;
-- prompt edits: `prompt-reviewer`;
-- skill changes: the applicable `skill-checker`, `skill-logic-reviewer`, and
-  `skill-simplicity-reviewer` lanes;
+- every completed code implementation: `fw-code-reviewer`;
+- layout implementation: `fw-layout-reviewer` with prepared source and rendered evidence;
+- meaningful test-code changes: `fw-test-reviewer` through `test-master`;
+- changed security boundaries or an explicit security request: `fw-security-reviewer`;
+- documentation edits: `fw-docs-reviewer`;
+- material infrastructure work or an explicit infrastructure review: `fw-infra-reviewer`;
+- prompt edits: `fw-prompt-reviewer`;
+- skill changes: the applicable `fw-skill-checker`, `fw-skill-logic-reviewer`, and
+  `fw-skill-simplicity-reviewer` lanes;
 
-After the final permitted wave, the executor runs applicable direct checks and reports remaining
-findings or required scope decisions instead of starting an unbounded review loop.
+## Model classes
+
+Skills and agents name a class of model, never a model or a vendor. Two classes exist: `fast` for
+mechanical, high-volume, low-judgement steps such as search fan-out, listings, mechanical edits, and
+data collection; `good` for review, planning, architecture, and spec quality, and for any work that
+judges another agent's output. The class is bound to a concrete model in runtime configuration,
+outside this repository: for omp, role aliases in `task.agentModelOverrides` with concrete selectors
+in `modelRoles`; for pi, the single `defaultProvider`/`defaultModel` in `settings.json`, where both
+classes collapse into the session model. The contract's `model` field exists, but no framework skill
+or agent file ever carries it.
+
+## Orchestration: one step, one orchestrator
+
+Fresh context is the anti-anchoring mechanism. In omp a subagent is already isolated. In pi only an
+orca worker gives fresh context — a separate process in an orca worktree: run the review wave before
+delivering large work, omp↔pi handoffs, and file-isolated tasks through the `orca` CLI; within one pi
+session independence is not guaranteed.
+
+The in-session `task` tool and an orca worker are two different orchestrators, and one step uses
+exactly one of them. Use `task` when the work stays entirely inside the current session and runtime:
+quick local checks and decomposition into bounded subtasks. Its subagents are child sessions of the
+same harness and die with the session. Use an orca worker when at least one worker condition holds —
+the review wave before delivering large work, an omp↔pi handoff, file isolation — or when the result
+must outlive the session or run in another runtime. When in doubt, choose by this rule instead of
+spawning both in one step: neither runtime documents the semantics of mixing the two.
+
+The words "orchestrate" or "orchestration" from a user select neither mechanism by themselves. The
+choice follows the worker conditions above and the version-matched `orca` guides (`orca-cli`,
+`orchestration`), never the wording of a request; project skills do not depend on any keyword being
+spoken.
 
 ## Working Principles
 
@@ -244,57 +274,3 @@ findings or required scope decisions instead of starting an unbounded review loo
   finding never expands authorization.
 - **Stable commits:** commit meaningful states such as a draft spec, approved spec, verified
   implementation, or finalized documentation; do not force incidental state into a commit.
-
-## Claude and Codex Dual Runtime
-
-Allowlisted Claude files are the source of truth; Codex files are generated runtime artifacts:
-
-```text
-Claude source                                         Codex runtime
-~/.claude/skills/**                                   ~/.codex/skills/**
-~/.claude/agents/*.md                                 ~/.codex/agents/*.toml
-~/.claude/commands/*.md, when present                 ~/.codex/skills/source-command-*/**
-{project}/CLAUDE.md                                   {project}/AGENTS.md
-{project}/.claude/{skills,agents,commands}/**          {project}/.codex/{skills,agents}/**
-```
-
-Markdown sources and references are adapted for the target runtime. Other bundled resources such
-as scripts, assets, images, and data are copied byte-for-byte, so bundled executables must remain
-runtime-neutral and resolve resources relative to their own package.
-
-Conversion is manual. After changing an allowlisted global Claude source, run and review:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --apply
-```
-
-After changing a project-local Claude source, run and review:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply
-```
-
-Generated project `AGENTS.md` and `.codex/**` files are committed with their Claude sources,
-except host-local `.codex/.sync/**`. Global `~/.codex/**` is runtime state outside the
-`~/.claude` source repository and is not added to its commits. A reported conflict or validation
-error stops the workflow.
-
-Approved deletions or renames may leave managed generated outputs. Inspect the reported orphan
-list and prune only when every target corresponds to the approved source change; do not use prune
-as a routine sync option.
-
-### MCP Import
-
-MCP import is separate from skill conversion. The importer scans the global Claude MCP source and
-immediate projects under `~/projects`; `--project` adds roots rather than narrowing that host-wide
-scope. Preview changes on every host whose Codex runtime must change:
-
-```bash
-~/.claude/scripts/sync-mcp-to-codex.sh
-```
-
-Review sources, servers, and warnings; stop on any warning or validation error. Then apply with
-`--apply` and inspect every changed Codex configuration. The dry run does not report deletions
-performed by `--prune`, so normal changes do not use it. Treat removal or relocation as a separate
-maintenance operation: inspect the import manifest and every target before an explicit prune. No
-scheduler performs either conversion, and credentials never belong in commits.

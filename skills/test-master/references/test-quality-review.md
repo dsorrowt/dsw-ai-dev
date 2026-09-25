@@ -120,9 +120,13 @@ improvement, or pyramid preference without concrete impact is not a finding.
 
 - `critical` — an undetected regression can cause a security breach, data loss, destructive
   behavior, or failure of a core project contract;
-- `high` — it can break a material user or system behavior;
-- `medium` — it can break a real secondary behavior or make a meaningful regression invisible;
-- `low` — it has a concrete but narrowly limited consequence.
+- `major` — it can break a material user or system behavior, or make a meaningful regression
+  invisible;
+- `minor` — it can break a real secondary behavior or has a concrete but narrowly limited
+  consequence.
+
+This is the one shared severity scale of the reviewer contract
+(`skill://methodology/references/reviewer-contract.md`); a role never invents its own scale.
 
 ---
 

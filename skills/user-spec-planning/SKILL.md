@@ -5,7 +5,10 @@ description: |
 
   Use when: "сделай юзер спек", "проведи интервью для юзер спека",
   "создай юзерспек", "user spec", "detailed planning", "хочу продумать фичу",
-  "опиши требования к фиче", "сделай описание фичи", "/new-user-spec"
+  "опиши требования к фиче", "сделай описание фичи", "/new-user-spec" — the planning process that
+  ends in an approved `work/{feature}/user-spec.md` for this methodology's implementation pipeline.
+  For a design-grilling interview that only sharpens a plan and records ADRs or a glossary, use
+  `grill-with-docs` instead.
 ---
 
 # User Spec Planning
@@ -29,7 +32,9 @@ until the applicable requirements are understood.
   they survive into `Accepted Decisions`.
 
 When Project Knowledge exists, read its `SKILL.md` as the router and load only the references
-relevant to the task. Missing Project Knowledge does not block planning.
+relevant to the task. Missing Project Knowledge never blocks planning; implementation work that
+needs it as operating context (for example `infrastructure-setup`) stops and asks the user to
+create or fill it through `documentation-writing`.
 
 ## Workflow
 
@@ -73,7 +78,7 @@ reference and continue the normal workflow.
 
 1. Score the initial description against every interview topic.
 2. Complete the general-understanding topics using the interview loop below.
-3. Once the intended outcome is clear enough to research, launch `code-researcher` with the
+3. Once the intended outcome is clear enough to research, launch `fw-code-researcher` with the
    feature path and description. Read `code-research.md` and use its evidence in later questions.
 4. Complete user-flow and integration topics, including applicable failures, edge cases,
    constraints, deployment, manual user actions, and verification.
@@ -92,14 +97,15 @@ record it as an explicit limitation or out-of-scope decision.
 
 ### 3. Check Interview Completeness
 
-Launch a fresh `interview-completeness-checker` with the feature path and intended scope. It reads
-the interview, code research, and relevant Project Knowledge and returns the common reviewer JSON
-directly.
+Launch a fresh `fw-uspec-interview-checker` with the feature path and intended scope. It reads the
+interview, code research, and relevant Project Knowledge and returns the common reviewer JSON
+directly. When the runtime has no subagents, the main session runs the same completeness check.
 
-Review findings are diagnoses, not a work queue. Check the evidence and exact response. Apply only
-an authorized local correction to agreed requirements. For `user_decision_required: true`, ask one
-concrete question and record the answer through the existing interview loop before changing
-artifacts or adding requirements. A `false` value does not replace this check.
+Findings are diagnoses for agreed requirements under the shared reviewer contract
+`skill://methodology/references/reviewer-contract.md` ("Findings are diagnoses, not a work queue"):
+check the evidence and the exact response, apply only an authorized local correction, and for
+`user_decision_required: true`, ask one concrete question and record the answer through the
+existing interview loop before changing artifacts or adding requirements.
 
 Use supported findings to ask targeted questions for gaps inside the agreed task. Run a fresh
 checker after the answers are recorded, and draft only after it returns `clean`.
@@ -121,14 +127,17 @@ Commit: `draft(userspec): create user-spec for {feature}`.
 
 ### 5. Validate the User Spec
 
-For every validation round, launch all three fresh reviewers in parallel:
+For every validation round, launch all three fresh reviewers in one `task` batch with a shared
+`context` and at most three tasks:
 
-- `userspec-quality-validator` — document completeness, clarity, acceptance criteria,
-  contradictions, and template compliance;
-- `userspec-adequacy-validator` — feasibility, proportionality, architecture fit, insufficient or
+- `fw-uspec-quality` — document completeness, clarity, acceptance criteria, contradictions, and
+  template compliance;
+- `fw-uspec-adequacy` — feasibility, proportionality, architecture fit, insufficient or
   unnecessary complexity, and demonstrably simpler existing approaches;
-- `skeptic` — factual claims about current files, symbols, dependencies, integrations, and
+- `fw-skeptic` — factual claims about current files, symbols, dependencies, integrations, and
   behavior.
+
+When the runtime has no subagents, the main session applies the same three lanes sequentially.
 
 Supply the complete inputs required by each agent. All reviewers may inspect code; overlap is
 acceptable when independently supported evidence falls within more than one lane.
@@ -143,6 +152,10 @@ and record the answer through the existing interview loop before changing the sp
 - After round 3, stop and show any remaining findings. Do not launch round 4 without a new explicit
   user request.
 
+One round is one wave of the complete set; the shared wave rules and the `user-spec-planning` round
+cap live in `skill://methodology/references/reviewer-contract.md` ("Review waves"), and the round
+numbers above are this workflow's step stop criteria.
+
 If a session ends after drafting, a later run starts a new validation from round 1; old reviewer
 responses are not persisted or reconstructed.
 
@@ -156,7 +169,8 @@ After explicit approval:
 1. Set the user-spec frontmatter status to `approved`.
 2. Set `interview_metadata.status` to `completed`.
 3. Commit `chore(userspec): approve user-spec for {feature}`.
-4. Return the absolute user-spec path and tell the user it can be implemented in a new chat.
+4. Return the absolute user-spec path and tell the user it can be implemented in a fresh session
+   or a new delegated task.
 
 ## Interview Loop
 

@@ -5,29 +5,12 @@ description: |
 
   Use when: "создай скилл", "измени скилл", "гайд по скиллам", "обнови скилл", "улучши скилл",
   "create skill", "update skill", "skill guide", "new skill", "how to write a skill"
+
+  Do NOT use for updating, re-fetching, or restoring a vendored skill from its upstream source —
+  use `update-skills` instead.
 ---
 
 # Skill Creator
-
-## Manual Claude-to-Codex Sync
-
-Claude-side is the source of truth for the converter's allowlist: global `skills/**`, `agents/*.md`,
-and `commands/*.md`; or project `CLAUDE.md`, `.claude/skills/**`, `.claude/agents/*.md`, and
-`.claude/commands/*.md`.
-Codex-side outputs are generated runtime. No scheduled job performs this conversion. After editing
-an allowlisted source, the editing agent runs the matching command and reviews the generated result
-before finishing:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --apply                   # global ~/.claude/**
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply  # project .claude/**
-```
-
-For a project, commit generated `.codex/**` / `AGENTS.md` changes with their Claude sources, except host-local `.codex/.sync/**`. Global `~/.codex/**` is runtime state outside the `~/.claude` repository: run the global command explicitly on every affected host and do not add it to the Claude-source commit. If sync reports a conflict or validation error, stop and report it.
-
-**Authoring a skill that edits `.claude/**`?** Paste the block above near the top of its `SKILL.md` so its changes reach Codex too. A skill that never touches `.claude/**` (pure analysis, code-writing in a project's own source tree) does not need it.
-
-**Bundled resources and the sync:** Markdown files (`SKILL.md`, `references/*.md`) are text-adapted during sync (Claude tool names → Codex equivalents). Every other bundled file — `scripts/`, `assets/`, images, data — is copied **byte-for-byte, unmodified**. So a bundled script must be **runtime-agnostic**: don't hardcode `.claude` paths or Claude-only tool names, since neither is rewritten in the Codex copy. Reference files relative to the script's own location, and let the surrounding `SKILL.md` prose (which *is* adapted) carry any runtime-specific instructions.
 
 ## About Skills
 
@@ -47,7 +30,7 @@ behavior or omit special handling.
 
 ## Skill Types
 
-There are two types of skills based on how they guide Claude's work.
+There are two types of skills based on how they guide the agent's work.
 
 ### Procedural Skills
 
@@ -105,7 +88,8 @@ skill-name/
 
 #### Description Best Practices
 
-Claude uses description to decide when to auto-invoke the skill. Be specific and include key terms.
+The runtime uses the description to decide when to auto-invoke the skill. Be specific and include
+key terms.
 
 **Template:**
 ```yaml
@@ -125,7 +109,7 @@ description: This skill helps with documents. Use when user wants to work with d
 **Good:**
 ```yaml
 description: |
-  Manage .claude/skills/project-knowledge/ docs: create, check, update.
+  Manage .agents/skills/project-knowledge/ docs: create, check, update.
 
   Use when: "заполни документацию", "создай документацию", "проверь документацию", "обнови документацию"
 ```
@@ -141,7 +125,11 @@ description: |
   Do NOT use for: writing new queries from scratch, schema design, data migrations.
 ```
 
-**Need argument-hint, disable-model-invocation, or model override?** Read [frontmatter-options.md](references/frontmatter-options.md) — optional fields and when to use each.
+**Need `disable-model-invocation` or another optional field?** Read
+[frontmatter-options.md](references/frontmatter-options.md) — the fields the runtimes actually read
+and when to use each. No skill frontmatter reads a `model` field: omp recognizes it only in agent
+files, and no framework wrapper ever sets it — the model comes from runtime configuration, and a
+skill or role names only the `fast`/`good` class.
 
 ### Body
 
@@ -162,7 +150,9 @@ Executable code (Python/Bash/etc.) for **deterministic mechanical work** — the
 
 Use scripts for repeated deterministic work such as calculation, transformation, or scaffolding.
 Do not use them to validate model judgment or police the skill's own output. A bundled script
-should handle its mechanical errors and expose a clear invocation contract.
+should handle its mechanical errors and expose a clear invocation contract. Keep a bundled script
+runtime-agnostic: reference bundled files relative to the script's own location instead of
+hardcoding runtime-specific paths, and leave runtime-specific instructions to the SKILL.md prose.
 
 #### References (`references/`)
 
@@ -172,15 +162,16 @@ Content needed in some execution paths, not all. If the skill branches (multiple
 
 **How to link references in SKILL.md:**
 
-Embed references where they are used:
+Embed references where they are used. In the examples below, a path containing `<example>` is a
+fictional placeholder for the skill you are designing — this skill ships no such file.
 
 **Pattern A: Action-embedded (strong)** — the workflow step's action IS applying the reference content. The agent cannot complete the step without loading the file.
 
 ```markdown
-3. Write tests following patterns from [testing-guide.md](references/testing-guide.md)
+3. Write tests following patterns from [testing-guide.md](references/<example>-testing-guide.md)
    (test structure, naming, what to skip)
 
-4. Apply audit criteria from [principles.md](references/principles.md) to each file
+4. Apply audit criteria from [principles.md](references/<example>-principles.md) to each file
    (code examples, obvious content, generic explanations)
 ```
 
@@ -197,18 +188,18 @@ passive resource catalog separated from the workflow.
 ```markdown
 ❌ Bad — passive catalog (ignored):
 ## Resources
-### references/structure.md
+### references/<example>-structure.md
 Complete description of all files...
-### references/principles.md
+### references/<example>-principles.md
 Quality principles...
 
 ✅ Good — embed each reference into the workflow step where it's needed:
-4. Apply audit criteria from [principles.md](references/principles.md) to each file
+4. Apply audit criteria from [principles.md](references/<example>-principles.md) to each file
 ```
 
 #### Assets (`assets/`)
 
-Files not intended to be loaded into context, but rather used within the output Claude produces.
+Files not intended to be loaded into context, but rather used within the output the agent produces.
 
 Use assets for templates, images, fonts, boilerplate, and other files copied or modified in the
 output rather than read as instructions.
@@ -225,7 +216,7 @@ Match the level of specificity to the task's fragility and variability:
 
 **Low freedom (specific scripts, few parameters)**: Use when operations are fragile and error-prone, consistency is critical, or a specific sequence must be followed.
 
-Think of Claude as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
+Think of the agent as exploring a path: a narrow bridge with cliffs needs specific guardrails (low freedom), while an open field allows many routes (high freedom).
 
 ### Progressive Disclosure
 
@@ -233,7 +224,7 @@ Skills use a three-level loading system to manage context efficiently:
 
 1. **Metadata (name + description)** — Always in context (~100 words)
 2. **SKILL.md body** — When skill triggers (<5k words)
-3. **Bundled resources** — As needed by Claude (unlimited, scripts execute without reading)
+3. **Bundled resources** — As needed by the agent (unlimited, scripts execute without reading)
 
 Keep SKILL.md body under 500 lines. Split content into separate files when approaching this limit. When splitting, reference them from SKILL.md and describe clearly when to read them.
 
@@ -241,7 +232,7 @@ Keep core workflow and selection guidance in SKILL.md. Move conditional or varia
 details into references, linked where the agent needs them.
 
 ```markdown
-**For tracked changes**, read [redlining.md](references/redlining.md) — revision marks and
+**For tracked changes**, read [redlining.md](references/<example>-redlining.md) — revision marks and
 accept/reject behavior.
 ```
 
@@ -281,23 +272,24 @@ reviewer.
 ### Run Applicable Reviewers
 
 Launch fresh skeptical reviewers according to what changed. Each applies the evidence gate and
-common JSON contract from [agents.md → Reviewer contract](references/agents.md):
+common JSON contract from the `methodology` skill's reviewer contract
+(`skill://methodology/references/reviewer-contract.md`); orchestrator mechanics are in
+[agents.md → Reviewer contract](references/agents.md):
 
-- `skill-checker` — form, routing, package structure, and references;
-- `skill-logic-reviewer` — executable logic on required paths and established contracts;
-- `skill-simplicity-reviewer` — unnecessary rules, mechanisms, checks, and complexity.
+- `fw-skill-checker` — form, routing, package structure, and references;
+- `fw-skill-logic-reviewer` — executable logic on required paths and established contracts;
+- `fw-skill-simplicity-reviewer` — unnecessary rules, mechanisms, checks, and complexity.
 
-Use `skill-checker` for form or routing changes, `skill-logic-reviewer` for workflow or branching
-changes, and `skill-simplicity-reviewer` when changing rules, phases, checkpoints, scripts, options,
-or references. Run all three in parallel for a new skill or a major rewrite. Do not run an
-unaffected lane merely to satisfy ceremony.
+Use `fw-skill-checker` for form or routing changes, `fw-skill-logic-reviewer` for workflow or
+branching changes, and `fw-skill-simplicity-reviewer` when changing rules, phases, checkpoints,
+scripts, options, or references. Run all three in parallel for a new skill or a major rewrite. Do
+not run an unaffected lane merely to satisfy ceremony.
 
 Provide the user scope, touched artifacts, relevant references and contracts, and validation
-evidence. Review findings are diagnoses, not a work queue. Check the evidence and exact correction;
-apply only an authorized local correction to agreed normal behavior. If the scenario is rare or
-unagreed, or the correction adds behavior, state, entities, contracts, dependencies, architecture,
-or material complexity, reject it with a short reason or ask the user before editing. A
-`user_decision_required: false` value does not replace this check. Follow
+evidence. Findings are diagnoses for agreed normal behavior under the shared reviewer contract
+`skill://methodology/references/reviewer-contract.md` ("Findings are diagnoses, not a work queue") —
+apply only an authorized local correction and reject or ask the user before a material or rare and
+unagreed one. Orchestrator mechanics are in
 [agents.md → Orchestrator responsibilities](references/agents.md).
 
-All three are defined under `~/.claude/agents/` and have skill-master preloaded.
+All three are defined under `~/.omp/agent/agents/` and autoload `skill-master`.

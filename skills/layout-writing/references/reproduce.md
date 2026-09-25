@@ -25,9 +25,9 @@ If the supplied link identifies only a whole file, request the needed frame or e
 
 ## Other Exact Sources
 
-### Claude Design
+### Design Export (HTML/CSS or PDF)
 
-Prefer a Project HTML ZIP or standalone HTML because it preserves hierarchy, CSS clues, and assets. Use PDF or a stable rendered artifact when HTML is unavailable, and render the relevant block to a separate native-size image before comparison. Source code is evidence, not production code; adapt it to the target project while preserving authoritative visual values.
+Prefer an HTML/CSS export — a project archive or standalone HTML — because it preserves hierarchy, CSS clues, and assets. Use PDF or a stable rendered artifact when HTML is unavailable, and render the relevant block to a separate native-size image before comparison. Source code is evidence, not production code; adapt it to the target project while preserving authoritative visual values.
 
 ### Screenshot or Existing Page
 

@@ -1,9 +1,10 @@
 ---
 name: layout-writing
 description: |
-  Reproduces and adjusts web layouts from Figma, Claude Design exports, screenshots, or an existing project style with high visual fidelity and proportional verification.
-  Use when: "сверстай по Figma", "поправь вёрстку", "подвинь блок", "перенеси из Claude Design", "сделай адаптив", "добавь в том же стиле", "implement layout", "match Figma", "fix responsive layout".
-  Use alongside code-writing for mixed layout and business-logic tasks; use code-writing alone for logic-only work. Blank-slate visual design is outside this skill.
+  Reproduces and adjusts web layouts from a design export (Figma, HTML/CSS export, screenshot) or an existing project style with high visual fidelity and proportional verification.
+  Use when: "сверстай по Figma", "поправь вёрстку", "подвинь блок", "перенеси из макета", "сделай адаптив", "добавь в том же стиле", "implement layout", "match Figma", "fix responsive layout" — a layout must be implemented or adjusted against a source or an existing project style.
+  For blank-slate visual design with no source to match — use `frontend-design` instead.
+  Use alongside code-writing for mixed layout and business-logic tasks; use code-writing alone for logic-only work.
 ---
 
 # Layout Writing
@@ -61,26 +62,23 @@ behavior; use both for mixed work.
 
 ## Review and Hand Off
 
-Run no more than two review waves. After every implementation, run wave 1 with one fresh
-`layout-reviewer` without a model override. Pass the request, scope, changed files, applicable
-repository instructions and project-pattern evidence, source mode and responsibility boundary,
-all checked widths, site images for every checked block and state, source and difference images
-where applicable, and the complete inventory and evidence set for a whole page or segmented tall
-block. Include reviewers required by other active skills in these same waves instead of starting a
-separate wave sequence.
+After every implementation, run the review waves for the result under the shared reviewer contract
+`skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
+"Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
+live there. Wave 1 is one fresh `fw-layout-reviewer` (autoloads `layout-reviewing`); after an
+authorized correction changes the reviewed result, recapture the affected evidence and run the
+next wave with a fresh reviewer. Pass
+the request, scope, changed files, applicable repository instructions and project-pattern
+evidence, source mode and responsibility boundary, all checked widths, site images for every
+checked block and state, source and difference images where applicable, and the complete inventory
+and evidence set for a whole page or segmented tall block.
 
-Review findings are diagnoses, not a work queue. Check the evidence and exact correction. Apply
-only an authorized local correction to agreed normal presentation. If the scenario is rare or
-unagreed, or the correction adds behavior, state, markup states, component contracts, architecture,
-or material complexity, reject it with a short reason or ask the user before editing.
-`user_decision_required: false` does not replace this check. After an authorized correction changes
-the reviewed result, recapture affected evidence and run wave 2 with a fresh `layout-reviewer`.
-Stop after a clean wave or when no authorized correction changes the result; do not start a wave
-only for a finding that awaits the user's decision.
-
-After wave 2, do not launch another reviewer automatically. Correct remaining local mismatches
-inside the agreed presentation, recapture and inspect the affected widths and states, and report
-any remaining findings or required user decisions.
+Findings are diagnoses for agreed normal presentation; the material areas here are behavior,
+state, markup states, component contracts, architecture, and material complexity. Apply only an
+authorized local correction, and do not start a wave only for a finding that awaits the user's
+decision. After the last wave, correct remaining local mismatches inside the agreed presentation,
+recapture and inspect the affected widths and states, and report any remaining findings or
+required user decisions.
 
 Hand off with the change summary, checks run, widths and blocks actually verified, finding
 dispositions, and known evidence limitations.

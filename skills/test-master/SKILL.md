@@ -3,7 +3,9 @@ name: test-master
 description: |
   Guides test selection, authoring, and quality review at the smallest reliable boundary.
 
-  Use when: "напиши тесты", "как тестировать", "проанализируй тесты", "проверь качество тестов", "ревью тестов", "тестовая стратегия"
+  Use when: "напиши тесты", "как тестировать", "проанализируй тесты", "проверь качество тестов", "ревью тестов", "тестовая стратегия" — the tests protecting an agreed change must be selected, authored, or reviewed.
+  For building a feature test-first through the red-green-refactor loop — use `tdd` instead.
+  For driving a local web app or a Playwright suite in a browser — use `webapp-testing` or `playwright-cli` instead.
 ---
 
 # Test Master
@@ -56,7 +58,8 @@ When authoring a selected type, apply its conditional guide:
 
 ## Test Review
 
-When meaningful test code changes, run a fresh `test-reviewer` in `full` mode after implementation.
+When meaningful test code changes, include a fresh `fw-test-reviewer` (autoloads `test-master`) in
+the review wave with the complete touched test code and its contracts supplied.
 For a user-requested review of existing tests, apply
 [test-quality-review.md](references/test-quality-review.md) — demonstrated coverage gaps,
 boundary problems, and ineffective tests.

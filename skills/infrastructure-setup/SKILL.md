@@ -12,29 +12,12 @@ description: |
 
 # Infrastructure Conventions
 
-## Manual Claude-to-Codex Sync
-
-Claude-side is the source of truth for the converter's allowlist: global `skills/**`,
-`agents/*.md`, and `commands/*.md`; or project `CLAUDE.md`, `.claude/skills/**`,
-`.claude/agents/*.md`, and `.claude/commands/*.md`. Codex-side outputs are generated runtime. No scheduled job performs this
-conversion. After editing an allowlisted source, run the matching command and review the generated
-result before finishing:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --apply                   # global ~/.claude/**
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply  # project .claude/**
-```
-
-For a project, commit generated `.codex/**` and `AGENTS.md` changes with their Claude sources,
-except host-local `.codex/.sync/**`. Global `~/.codex/**` is runtime state outside the
-`~/.claude` repository: run the global command explicitly on every affected host and do not add
-it to the Claude-source commit. If sync reports a conflict or validation error, stop and report
-it.
-
 ## Scope and Judgment
 
-- Project Knowledge is required infrastructure context. If it is absent, stop and ask the user to
-  create or fill it before continuing.
+- Project Knowledge is the required operating context for implementing infrastructure changes:
+  planning is never blocked by its absence, but implementation is. If Project Knowledge is absent or
+  empty, stop and ask the user to create or fill it — the write-up belongs to `documentation-writing`
+  — before continuing.
 - The user's request defines which changes are authorized. A request to inspect, review, or assess
   current infrastructure authorizes diagnosis and recommendations, not implementation.
 - Existing architecture and Project Knowledge are the current contract, not proof that the setup
@@ -97,24 +80,24 @@ incident behavior, notification routing, installation, and drills.
 
 - Match implementation verification to the changed boundary: container, workflow, artifact,
   timer, recovery path, or user-facing service behavior. Do not replay unrelated checks.
-- Use a fresh `infrastructure-reviewer` for an explicit review of current infrastructure or a
+- Use a fresh `fw-infra-reviewer` for an explicit review of current infrastructure or a
   change that materially affects production delivery, secrets, environment isolation, release
   publication, recovery, retention, monitoring, or shared-host boundaries. A trivial local or
   formatting-only change whose result is fully established by direct verification does not need a
   dedicated review. Supply the requested review boundary, relevant existing infrastructure,
   Project Knowledge, applicable topic references, and available runtime evidence.
-- When a dedicated review is required, run no more than two review waves. Wave 1 reviews the
-  requested current-infrastructure or completed-change boundary. After an authorized correction
-  changes the reviewed result, re-verify the affected boundary, refresh durable Project Knowledge
-  facts, and run wave 2 with a fresh `infrastructure-reviewer`. Stop after a clean wave or when no
-  authorized correction changes the result. Include reviewers required by other active skills in
-  these same waves instead of starting a separate wave sequence.
-- Review findings are diagnoses, not a work queue. Check the evidence and exact correction. Apply
-  only an authorized local correction to agreed normal operation. If the scenario is rare or
-  unagreed, or the correction adds delivery, recovery, monitoring, isolation, persistent state,
-  infrastructure entities, dependencies, architecture, or material complexity, reject it with a
-  short reason or ask the user before editing. `user_decision_required: false` does not replace
-  this check. Report unsupported or unrelated findings without acting on them.
-- After wave 2, do not launch another reviewer automatically. If a remaining local correction is
-  made inside the agreed change, verify its affected boundary directly and refresh durable Project
-  Knowledge facts. Report any remaining risks or required user decisions.
+- When a dedicated review is required, run the review waves for the requested boundary under the
+  shared reviewer contract `skill://methodology/references/reviewer-contract.md` ("Review waves";
+  "Findings are diagnoses, not a work queue") — wave counts, stop rules, and findings dispositions
+  live there. Wave 1 reviews the requested current-infrastructure or completed-change boundary with
+  a fresh `fw-infra-reviewer`; after an authorized correction changes the reviewed result,
+  re-verify the affected boundary, refresh durable Project Knowledge facts, and run the next wave
+  with a fresh `fw-infra-reviewer`.
+- Findings are diagnoses for agreed normal operation. The material areas here are delivery,
+  recovery, monitoring, isolation, persistent state, infrastructure entities, dependencies,
+  architecture, and material complexity: apply only an authorized local correction, reject a
+  material or rare and unagreed one with a short reason or ask the user before editing, and report
+  unsupported or unrelated findings without acting on them.
+- After the final permitted wave, if a remaining local correction is made inside the agreed change,
+  verify its affected boundary directly and refresh durable Project Knowledge facts. Report any
+  remaining risks or required user decisions.

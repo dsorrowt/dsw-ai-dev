@@ -65,18 +65,15 @@ what a correct result means and use representative normal, edge, and adversarial
 match the real task. Compare old and new versions on the same scenarios. Treat a metaprompt or
 model self-critique as a source of hypotheses, not as proof that a revision is better.
 
-Run no more than two review waves. After creating or changing a prompt, run wave 1 with a fresh
-`prompt-reviewer`. Supply the prompt location, required result and output contract, input sources,
-trust boundaries, model capabilities, and callers. Review findings are diagnoses, not a work queue.
-Check the evidence and exact correction; apply only an authorized local correction to agreed normal
-behavior. If the scenario is rare or unagreed, or the correction adds behavior, state, entities,
-contracts, dependencies, architecture, or material complexity, reject it with a short reason or ask
-the user before editing. `user_decision_required: false` does not replace this check. Include
-reviewers required by other active skills in these same waves instead of starting a separate wave
-sequence.
+After creating or changing a prompt, run the review waves for it under the shared reviewer contract
+`skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
+"Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
+live there. Wave 1 is a fresh `fw-prompt-reviewer` (autoloads `prompt-master`) with the prompt
+location, required result and output contract, input sources, trust boundaries, model
+capabilities, and callers; after an authorized fix changes the prompt, the next wave reviews the
+revised version with a fresh reviewer.
 
-If an authorized fix changes the prompt, run wave 2 with a fresh reviewer against the revised
-version. Stop after a clean wave or when no authorized correction changes the prompt. After wave 2,
-do not launch another reviewer automatically; make only remaining local corrections within the
-agreed prompt, perform applicable direct evaluation, and report any remaining findings or required
-user decisions.
+Findings are diagnoses for agreed normal behavior: apply only an authorized local correction to the
+agreed prompt. After the last wave, make only remaining local corrections within the agreed prompt,
+perform applicable direct evaluation, and report any remaining findings or required user
+decisions.

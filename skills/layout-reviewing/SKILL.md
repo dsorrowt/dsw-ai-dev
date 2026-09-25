@@ -3,7 +3,8 @@ name: layout-reviewing
 description: |
   Reviews implemented web layouts for source fidelity, responsive behavior, evidence coverage, and project consistency.
 
-  Use when: "проверь вёрстку", "ревью вёрстки", "проверь адаптив", "review layout", "check visual fidelity"
+  Use when: "проверь вёрстку", "ревью вёрстки", "проверь адаптив", "review layout", "check visual fidelity" — an implemented layout and its prepared evidence must be judged against the source or project style.
+  For general design feedback or UX-guideline advice without an implementation to verify — use `design-critique` or `web-design-guidelines` instead.
   Do NOT use for implementing or changing layouts — use layout-writing instead.
 ---
 

@@ -2,7 +2,10 @@
 name: code-reviewing
 description: |
   Reviews code against the user request, project conventions, cross-file contracts, and applicable quality risks.
-  Use when: "проверь код", "code review", "ревью кода", "review this code", "check code quality"
+  Use when: "проверь код", "code review", "ревью кода", "review this code", "check code quality" —
+  the review step of an agreed change: the review wave that judges the implementation before handoff.
+  Do NOT use for a post-hoc two-axis comparison of an unrelated commit range against a fixed point —
+  use `code-review` instead.
 ---
 
 # Code Reviewing

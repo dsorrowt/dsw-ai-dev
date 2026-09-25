@@ -1,195 +1,130 @@
-**English** | [Русский](README.ru.md)
+<div align="center">
 
 # AI-First Development Framework
 
-A practical, intent-driven methodology for building software with
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) and
-[Codex](https://github.com/openai/codex). It combines proportional planning, durable Project
-Knowledge, focused execution skills, and evidence-gated review without forcing every task through
-the same heavyweight pipeline.
+**Plan → approve → implement → verify → review → finalize, with agents.**
 
-User-facing artifacts follow the user's language. Technical documentation, code, prompts, and
-skill instructions stay in English so the same project remains portable across sessions and
-runtimes.
+[![MIT](https://img.shields.io/badge/license-MIT-3ddc97.svg)](LICENSE) [![omp · pi · orca](https://img.shields.io/badge/runtimes-omp%20%C2%B7%20pi%20%C2%B7%20orca-6d7cff.svg)](#what-runs-where) [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-29d3ee.svg)](#install) [![13 skills](https://img.shields.io/badge/agent%20skills-13-8b5cf6.svg)](#whats-inside) [![15 reviewers](https://img.shields.io/badge/reviewers-14%20%2B%201%20researcher-f472b6.svg)](#whats-inside)
 
-## Two runtimes, one source
+A compact, runtime-first workflow for building software with coding agents.
+Fork of [molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev).
 
-Claude files are the editable source of truth. Codex files are generated runtime artifacts.
+</div>
 
-| Claude source | Codex runtime |
-|---|---|
-| `~/.claude/skills/**` | `~/.codex/skills/**` |
-| `~/.claude/agents/*.md` | `~/.codex/agents/*.toml` |
-| `~/.claude/commands/*.md`, when present | `~/.codex/skills/source-command-*/**` |
-| Project `CLAUDE.md` | Project `AGENTS.md` |
-| Project `.claude/**` | Project `.codex/**` |
+---
 
-After editing Claude-side sources, regenerate and review the Codex runtime:
+## The methodology in one screen
 
-```bash
-~/.claude/scripts/sync-to-codex.sh --apply
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply
+```mermaid
+flowchart LR
+    plan[Plan] --> implement[Implement] --> verify[Verify] --> review[Review] --> finalize[Finalize]
+    plan -.->|feature path| spec[Agreed user-spec]
+    spec -.-> implement
 ```
 
-The conversion is manual and reports conflicts, validation failures, and managed orphans instead
-of silently deleting ambiguous runtime output.
+| Step | Owning skill | Produces | Stops when |
+|---|---|---|---|
+| **Plan** | `user-spec-planning` | `work/{feature}/user-spec.md`, interview log, code research | the user approves the spec, after validation by `fw-uspec-quality`, `fw-uspec-adequacy`, `fw-skeptic` |
+| **Implement** | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` | the agreed change only, checked at the smallest reliable boundary chosen by `test-master` | observable behavior matches the spec, and the verified state is committed |
+| **Review** | `code-reviewing` + the fresh `fw-*` reviewers | evidence-gated findings per the shared [reviewer contract](skills/methodology/references/reviewer-contract.md) | no unaddressed material finding; corrections only when the request or spec authorizes them |
+| **Finalize** | `documentation-writing` | updated Project Knowledge, feature moved to `work/completed/{feature}/` | Project Knowledge matches the code and the feature is archived |
 
-## Quick start
+**Three sources of truth.** The approved `user-spec.md` owns the agreed feature outcome; Project
+Knowledge owns durable project facts; the code owns implementation detail. A finding is a diagnosis,
+never a work queue — the orchestrator applies only an authorized correction.
 
-Clone the repository:
+**Three cross-cutting pieces.** `methodology` maps the process; `project-initialization` creates a
+repository from the bundled template; `security-auditor` supplies review criteria for security work.
+
+## Install
+
+> [!NOTE]
+> One-time, per-machine step. Nothing is recorded on disk — the source tree is the state, so a
+> repeated `install` is the drift check.
 
 ```bash
-git clone https://github.com/pavel-molyanov/molyanov-ai-dev.git
-cd molyanov-ai-dev
+git clone https://github.com/dsorrowt/dsw-ai-dev.git
+cd dsw-ai-dev
+python3 scripts/fw-install.py install               # copy skills/** and agents/fw-*.md
+python3 scripts/fw-install.py uninstall --dry-run  # print the plan, change nothing
+python3 scripts/fw-install.py uninstall            # delete the copies the sources describe
 ```
 
-For a new or empty setup, copy the runtime you use:
+Copies land in `~/.agents/skills/` and `~/.omp/agent/agents/`; exit codes are `0` done, `2` refused
+or failed, `3` nothing installed.
 
-```bash
-mkdir -p ~/.claude/scripts ~/.codex
-cp -R skills agents ~/.claude/
-cp scripts/sync-*.py scripts/sync-*.sh ~/.claude/scripts/
-cp -R .codex/skills .codex/agents ~/.codex/
+<details>
+<summary><b>Safety contract</b></summary>
+
+- `install` copies missing files and rewrites anything that differs from its source; it refuses
+  before writing anything when a destination is a symlink, a directory, or sits behind a file.
+- Writes go through a directory chain opened without following symlinks and land via `os.replace`,
+  so a symlink swapped in mid-run cannot redirect them.
+- `uninstall` deletes exactly the copies the sources describe, keeps content the plan does not name,
+  and removes the directories below the managed roots that become empty. A re-run finishes an
+  interrupted uninstall; a symlinked or unparsable source tree refuses the run.
+- A copy whose source was deleted from the tree, and an edit to an installed copy, are not
+  preserved: the next command replaces or removes them.
+- No automatic backup. Optional insurance:
+  `tar -C ~/.agents -czf ~/agents-skills-backup.tgz skills`.
+
+</details>
+
+## What's inside
+
+**13 Agent Skills** — each owns its `SKILL.md`, optional `references/`, deterministic `scripts/`,
+and output `assets/`, so packages stay portable instead of reaching into global directories.
+
+| Area | Skills |
+|---|---|
+| Process | `methodology`, `project-initialization` |
+| Planning | `user-spec-planning`, `documentation-writing` |
+| Execution | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` |
+| Quality | `test-master`, `code-reviewing`, `layout-reviewing`, `security-auditor` |
+
+**15 agent wrappers** (`agents/fw-*.md`) — 14 reviewers and one researcher. A reviewer wrapper adds
+fresh isolated context, a bounded skeptical role, and the minimum tools needed to inspect evidence;
+`fw-code-researcher` instead gathers code evidence for planning and writes `code-research.md`. The
+model of any wrapper comes from runtime configuration, never from the caller. All 14 reviewers read
+one shared [reviewer contract](skills/methodology/references/reviewer-contract.md) — stance, result
+schema, severity scale, review-wave ceiling, and findings rules live there once, and the contract
+lists exactly those 14 roles.
+
+### What runs where
+
+| Capability | omp | pi | orca |
+|---|---|---|---|
+| Skills | `~/.agents/skills/` after install | same user location; project skills need trust | shares skill bundles |
+| Agent layer | `~/.omp/agent/agents/` after install | no subagents | separate worker processes |
+| Project context | `AGENTS.md` | `AGENTS.md`, no trust step | — |
+| Orchestration | in-session `task` tool | orca worker required for fresh context | worktrees, terminals, handoffs |
+
+**One step, one orchestrator.** Either the in-session `task` tool or an orca worker — never both:
+neither runtime documents the semantics of mixing them.
+
+<details>
+<summary><b>Boundaries and limitations</b></summary>
+
+- pi has no subagents; independent review and cross-runtime handoffs need an orca worker.
+- Project `.agents/skills/` in pi requires a trust decision; omp wrappers need the global install.
+- The optional template MCP config ships unpinned on purpose: review it and pin an exact package
+  version before enabling it.
+- Routing may name skills the runtime supplies (`code-review`, `update-skills`) rather than this
+  repository.
+- The local process documents under `work/` are git-ignored and are not part of the published fork.
+
+</details>
+
+## Repository map
+
+```text
+skills/       Agent Skills: process, planning, execution, quality
+agents/       15 fw-* wrappers for omp: 14 reviewers + 1 code researcher
+scripts/      fw-install.py — install and uninstall, no state file
+AGENTS.md     Repository context: language, behavior, scope, worktrees, security
 ```
 
-If you already use Claude Code or Codex, do not overwrite your whole configuration. Compare this
-repository's `CLAUDE.md` and `AGENTS.md` with your files and manually add the instructions you are
-missing. Update framework skills and agents selectively, remove only obsolete framework packages,
-and keep your personal packages and Codex-owned `.codex/skills/.system` unchanged.
+## License
 
-Then describe the outcome in plain language. Skills route by intent; slash-command wrappers are
-not required.
-
-Typical starting points:
-
-- New repository: “Initialize this project” → `project-initialization`
-- Initial or updated project documentation: “Create Project Knowledge” → `documentation-writing`
-- Feature that needs agreement first: “Let's plan this feature” → `user-spec-planning`
-- Small implementation: “Implement/fix this” → the matching execution skill
-- Review only: “Review this code/layout/security boundary” → the matching review skill
-
-## How the methodology works
-
-### Choose the smallest path that fits
-
-| Need | Workflow |
-|---|---|
-| Small, well-defined change | Matching execution skill directly |
-| Feature whose behavior or approach needs agreement | `user-spec-planning` → approval → implementation → finalization |
-| New repository | `project-initialization` → initial Project Knowledge → feature or ad-hoc work |
-| Documentation-only work | `documentation-writing` with an explicit evidence boundary |
-| Review or audit only | Matching review skill or reviewer; no artifact modification |
-
-One request may activate several skills. A UI feature with state changes, for example, can combine
-`layout-writing` and `code-writing` while sharing one verification and review cycle.
-
-### Planned feature lifecycle
-
-1. **Plan.** `user-spec-planning` runs an adaptive interview, reads relevant Project Knowledge,
-   researches the codebase, and writes `work/{feature}/user-spec.md` from bundled templates.
-2. **Validate.** Fresh quality, adequacy, and factual-codebase reviewers check the same draft.
-   Findings must identify concrete evidence, a violated requirement, realistic conditions, and
-   impact.
-3. **Approve.** The user explicitly approves the user spec before implementation begins.
-4. **Implement.** The required execution skills make the scoped change and run the smallest checks
-   that establish the result. Applicable reviewers inspect the completed revision.
-5. **Finalize.** `documentation-writing` updates only affected durable Project Knowledge and moves
-   the feature folder to `work/completed/{feature}/`.
-
-A small direct request does not need a user spec. Risks or ideas found during execution are
-reported as proposals; they do not silently expand the authorized scope.
-
-### Project Knowledge
-
-Durable project facts live in `.claude/skills/project-knowledge/`. Its `SKILL.md` is the router and
-loads only the context needed for the current task. Standard projects may use references such as:
-
-- `project.md` — purpose, audience, features, and scope
-- `architecture.md` — stack, structure, integrations, and data boundaries
-- `patterns.md` — project-specific conventions, testing, and business rules
-- `deployment.md` — environments, delivery, operations, and recovery
-- `ux-guidelines.md` — UX language and domain guidance when it forms a useful context boundary
-
-`CLAUDE.md` stays a compact entry point rather than duplicating this documentation.
-
-## Skills
-
-### Planning and project context
-
-| Skill | Purpose |
-|---|---|
-| `methodology` | Explains routing, lifecycle, sources of truth, and review model |
-| `project-initialization` | Creates a dual-runtime project, preserves existing files, configures hooks, Git, and a private GitHub repository |
-| `documentation-writing` | Creates, audits, updates, and finalizes Project Knowledge |
-| `user-spec-planning` | Produces an approved user spec through adaptive interview, code research, and validation |
-
-### Execution
-
-| Skill | Purpose |
-|---|---|
-| `code-writing` | Application behavior, APIs, state, validation, and focused code changes |
-| `layout-writing` | High-fidelity UI implementation, responsive behavior, and visual evidence |
-| `infrastructure-setup` | Local setup, Docker, hooks, CI/CD, delivery, monitoring, backups, and operations |
-| `prompt-master` | LLM prompt creation, improvement, and review |
-| `skill-master` | Skill and reviewer-agent creation or revision |
-
-### Testing and review
-
-| Skill | Purpose |
-|---|---|
-| `test-master` | Selects the smallest reliable test boundary and reviews test quality |
-| `code-reviewing` | Reviews code against scope, project contracts, and quality risks |
-| `layout-reviewing` | Reviews visual fidelity, responsiveness, and evidence coverage |
-| `security-auditor` | Reviews changed security boundaries against applicable OWASP risks |
-
-## Agents
-
-Agents provide fresh, bounded context for research and skeptical review. Reviewers diagnose only:
-they do not edit artifacts or decide whether work ships.
-
-| Group | Agents |
-|---|---|
-| Research and user-spec validation | `code-researcher`, `interview-completeness-checker`, `skeptic`, `userspec-quality-validator`, `userspec-adequacy-validator` |
-| Implementation and documentation review | `code-reviewer`, `layout-reviewer`, `test-reviewer`, `security-auditor`, `documentation-reviewer`, `infrastructure-reviewer`, `prompt-reviewer` |
-| Skill review | `skill-checker`, `skill-logic-reviewer`, `skill-simplicity-reviewer` |
-
-Claude definitions live in `agents/*.md`; native Codex definitions live in
-`.codex/agents/*.toml`.
-
-## Bundled skill resources
-
-Resources now live with the skill that owns them; the legacy shared resource tree has been
-removed.
-
-- `project-initialization/assets/new-project/` — dual-runtime project scaffold, Project Knowledge,
-  hooks, secret-safe `.gitignore`, backlog, and work archive
-- `user-spec-planning/assets/` and `scripts/` — user-spec, interview, decisions templates, and
-  deterministic feature-folder initialization
-- `documentation-writing/assets/` and `references/` — Project Knowledge interview and topology
-  guidance
-- `layout-writing/scripts/` — capture, overlay, and visual comparison utilities with tests
-- `infrastructure-setup/references/` — deployment, release, monitoring, and alerting guidance
-- `test-master/references/` — unit, integration, smoke, end-to-end, and test-review guidance
-- `skill-master/references/` — skill forms, interviews, reviewer contracts, and output patterns
-
-## Scripts and Codex support
-
-- `scripts/sync-to-codex.py` / `.sh` convert Claude skills, agents, commands, and project
-  instructions into Codex runtime artifacts.
-- `scripts/sync-mcp-to-codex.py` / `.sh` preview and import MCP configuration separately from skill
-  conversion.
-- `.codex/skills/` and `.codex/agents/` provide a ready-made sanitized Codex runtime snapshot.
-- Codex-owned `.system` skills and host-local `.codex/.sync/` state are intentionally excluded.
-
-## Requirements
-
-- Claude Code CLI and/or Codex CLI
-- Python 3.11+
-- Bash-compatible shell (macOS/Linux, WSL, or Git Bash on Windows)
-- Git; GitHub CLI (`gh`) for `project-initialization`
-- Context7 MCP configuration used by the bundled project template
-- Node.js when using the bundled layout capture and comparison scripts
-
-## License and author
-
-[MIT](LICENSE) © [Pavel Molyanov](https://molyanov.ru)
+MIT © 2024 [Pavel Molyanov](https://molyanov.ru) — upstream author of
+[molyanov-ai-dev](https://github.com/pavel-molyanov/molyanov-ai-dev). Full text in [LICENSE](LICENSE).

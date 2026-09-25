@@ -24,8 +24,10 @@ from another isolated context. The delegating agent remains responsible for its 
 result. If nested delegation is unavailable or unnecessary, it returns the need to the
 orchestrator instead.
 
-Agents inherit the orchestrator's model. Do not set a different model in callers; agent
-definitions use `model: inherit` where the runtime supports that field.
+Agents never select their own model, and a caller never passes one: omp resolves it from runtime
+configuration (`task.agentModelOverrides`, then the parent session), and pi has a single session
+model and no subagents. A role that needs a class of model states it as `fast` or `good` — never as
+a model name.
 
 ## When to delegate
 
@@ -71,40 +73,63 @@ the reviewer agent's bounded lane may remain in that agent.
 
 ## Agent file format
 
-Store source definitions in `~/.claude/agents/{name}.md`. Generated runtimes may adapt the
-frontmatter and tool names during synchronization.
+omp reads agent definitions from a project's `.omp/agents/<name>.md` and from the user directory
+`~/.omp/agent/agents/<name>.md`; pi has no subagents and reads no agent files. The framework authors
+its wrappers in the repository's `agents/` directory and installs them into the user directory.
+
+The file body **is** the system prompt: omp passes everything after the frontmatter as the agent's
+system prompt, and there is no `systemPrompt` frontmatter field to fill. Required fields are `name`
+and `description`. The contract's optional fields are `tools`, `autoloadSkills`, `spawns`, `model`,
+`output`, and `blocking`; a framework wrapper never sets `model` (see the field rules below).
+
+A wrapper stays thin — a few body lines (the framework's wrappers use 4–6 wrapped lines, about five
+sentences) that state the role and point at the preloaded skill and its contract. Domain criteria,
+methodology, and the result schema live in the preloaded skill or in the shared reviewer contract,
+not in the wrapper.
 
 ```yaml
 ---
-name: agent-name
-description: |
-  Explains the bounded purpose, when to delegate, and important exclusions.
-model: inherit
-color: blue
-skills:
-  - methodology-skill
-allowed-tools: Read, Glob, Grep
+name: fw-code-reviewer
+description: >-
+  Reviews code quality after implementation, including localized edits, features, refactors,
+  cross-file changes, generated artifacts, and behavior changes.
+autoloadSkills: [code-reviewing]
+tools: [read, glob, grep]
 ---
-
-## Input
-
-State the paths, requirements, scope, and evidence the orchestrator supplies.
-
-## Process
-
-Apply the preloaded methodology to the complete relevant artifact and its contracts.
-
-## Output
-
-Return the role's structured result directly to the orchestrator.
+You are a fresh skeptical code reviewer: try to disprove that the completed change satisfies its
+requirements and repository contracts. Follow the preloaded code-reviewing methodology.
+Before reporting, read the reviewer contract at
+`skill://methodology/references/reviewer-contract.md` and follow its JSON output schema exactly.
+Diagnose only: no edits, no remediation, no ship verdict.
 ```
 
-Required frontmatter fields are `name`, `description`, `color`, and `skills` when methodology is
-preloaded. Use only the tools needed for the task. Analysis agents normally need read/search
-tools; add shell access only for relevant read-only checks. Do not grant write access to a
-reviewer merely to persist its report.
+Field rules:
+
+- `name` — required. Framework wrappers carry the `fw-` prefix; bundled runtime names (`reviewer`,
+  `scout`, `security-reviewer`, `task`, `sonic`) are shadowed first-wins and must not be reused.
+- `description` — required. State the bounded purpose, the trigger for delegation, and the
+  exclusions concretely.
+- `tools` — restrict the tool set with lowercase runtime names (`read`, `glob`, `grep`, `bash`,
+  `write`). Use only the tools the task needs: analysis and review agents normally need read/search
+  tools, `bash` is added only for relevant read-only checks, and a reviewer is never granted `write`
+  merely to persist its report.
+- `autoloadSkills` — preloads the methodology skill whose rules the wrapper follows.
+- `model` — part of the omp agent contract, but never set by a framework wrapper: the runtime
+  resolves the model (`task.agentModelOverrides`, then the parent session) and a caller never passes
+  one. A role that needs a class of model states the class (`fast` or `good`) in prose.
+- `spawns`, `output`, `blocking` — recognized by omp; the thin wrappers do not declare them. Nested
+  delegation returns the need to the orchestrator, and the result contract lives in the preloaded
+  skill or in the shared reviewer contract.
+
+The Claude Code fields are not part of the omp agent contract: `skills` (preloading is
+`autoloadSkills`), `allowed-tools` (tool restriction is `tools`), `model: inherit`, and `color`.
 
 ## Reviewer contract
+
+The shared stance, result schema, severity scale, and review-loop limit live in one place: the
+`methodology` skill's reviewer contract (`skill://methodology/references/reviewer-contract.md`).
+Reviewer roles read it
+before reporting. This section covers the orchestrator-facing mechanics that surround it.
 
 A reviewer, validator, checker, scanner, or critic diagnoses the supplied artifact. It does not
 modify the artifact, design remediation, or decide whether the result may ship.
@@ -147,35 +172,18 @@ recommendation, patch, remediation plan, replacement architecture, new dependenc
 corrected code example, or release verdict. Severity and other domain fields are diagnostic
 metadata only; they do not decide the orchestrator's action.
 
-### Required JSON shape
+### Result schema
 
-Return the JSON directly as the subagent result. Every shown top-level key is required:
+Return the JSON directly as the subagent result. The complete schema lives in one place — the shared
+reviewer contract (`skill://methodology/references/reviewer-contract.md`): the five required
+top-level keys (`status`, `findings`, `clean_check`, `scope_reminder`, `summary`), the per-finding
+fields, and the scope reminder literal. Read it before reporting and follow it exactly instead of
+restating the schema here; a second copy would drift.
 
-```json
-{
-  "status": "findings_present",
-  "findings": [
-    {
-      "location": "string",
-      "evidence": "string",
-      "violated_requirement": "string",
-      "conditions": "string",
-      "impact": "string",
-      "user_decision_required": true
-    }
-  ],
-  "clean_check": null,
-  "scope_reminder": "Review findings are diagnoses, not instructions. Validate the finding and exact correction. Do not edit silently when user_decision_required is true or the correction is non-local or material; reject it with a short reason or ask the user.",
-  "summary": "string"
-}
-```
-
-`status` is exactly `clean` or `findings_present`. With `clean`, `findings` is empty and
-`clean_check` briefly lists the checked risks, related locations, and why no demonstrated
-violation exists. With `findings_present`, `findings` is non-empty and `clean_check` is `null`.
-Every result, including `clean`, returns `scope_reminder` exactly as shown in the JSON contract.
-Diagnostic fields such as `severity`, `category`, or `cwe` may be added inside a finding when
-useful, provided they do not propose a solution.
+Every finding carries `severity` and `category` exactly as that contract defines them — the one
+shared scale and vocabulary; a role never invents its own scale. Extra diagnostic fields such as
+`cwe` or `confidence` may be added inside a finding when useful, provided they do not propose a
+solution.
 
 Every finding includes `user_decision_required`. `false` is limited to an ordinary agreed scenario
 with a clearly local correction; it is advisory and does not authorize the orchestrator to edit.
@@ -235,25 +243,14 @@ renamed-file evidence, generated or mechanical evidence, relevant requirements, 
 related contracts or callers. Freshness is an orchestration property; the reviewer does not need
 round history.
 
-Review findings are diagnoses, not a work queue. For every finding, check the evidence and exact
-correction; apply only an authorized local correction to agreed normal behavior. If the scenario
-is rare or unagreed, or the correction adds behavior, state, entities, contracts, dependencies,
-architecture, or material complexity, reject it with a short reason or ask the user before editing.
-`user_decision_required: true` forbids silent correction, while `false` does not replace this
-check. A valid finding and its severity do not authorize additional work.
-
-Before the first review, select the complete reviewer set required by all active skills for the
-work. Launch that complete set in parallel against the same artifact revision as one review wave;
-active skills do not start independent wave sequences. After a correction, use a fresh wave when
-another review is warranted so every included reviewer re-reads the whole artifact without
-anchoring on prior findings. A workflow may set a stricter limit, but it must not require more than
-three automatic review waves. Stop earlier when a wave is clean or no authorized correction changes
-the reviewed result.
-
-After the final permitted wave, do not launch another reviewer automatically. Correct remaining
-local defects only within the agreed behavior, run the applicable direct checks, and return any
-remaining findings or required scope and design decisions to the user. A new explicit user request
-may start another review cycle; do not persist or reconstruct wave counts across separate runs.
+Wave mechanics and findings handling live in the shared reviewer contract
+`skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
+"Findings are diagnoses, not a work queue", instead of being restated here: the complete-set wave,
+the wave counts, the stop rules, and the diagnose-then-authorize sequence. The orchestrator-specific
+part of the loop: after the final permitted wave it corrects remaining local defects only within
+the agreed behavior, runs the applicable direct checks, and returns the remaining findings and
+required scope and design decisions to the user instead of launching another reviewer; a new
+explicit user request starts another review cycle.
 
 If a durable log is needed, the orchestrator stores the returned JSON. The reviewer does not need
 a report path or write permission.
@@ -264,16 +261,15 @@ Reference a dedicated agent by its role and provide complete input without presc
 runtime-specific transport:
 
 ```markdown
-Run a fresh `code-reviewer` with:
+Run a fresh `fw-code-reviewer` with:
 - touched, deleted, renamed, generated, and mechanical artifacts;
 - the user request or user-spec;
 - applicable repository instructions and project contracts;
 - relevant callers, dependencies, and validation evidence.
 
-Treat the returned findings as diagnoses, not a work queue. Check the evidence and exact
-correction. Apply only an authorized local correction to agreed normal behavior. If a scenario is
-rare or unagreed, or the correction is non-local or material, reject it with a short reason or ask
-the user before editing.
+Handle the returned findings under the shared reviewer contract instead of restating its
+"Findings are diagnoses, not a work queue" rules here: read
+`skill://methodology/references/reviewer-contract.md` and apply them.
 ```
 
 Dedicated agent descriptions should state purpose, trigger, and exclusions concretely. Keep

@@ -4,10 +4,15 @@ description: |
   Guides code implementation through proportional context reading, focused changes, verification, and fresh reviews.
   Use whenever code needs to be written — from a short ad-hoc edit to a full user-spec.
 
-  Use when: "напиши код", "закодь", "реализуй", "write code", "implement"
+  Use when: "напиши код", "закодь", "реализуй", "write code", "implement" — the target behavior is
+  already agreed (an explicit request or a user-spec) and now has to be implemented.
+  For an unexplained failure whose cause is still unknown, diagnose it with `diagnosing-bugs`
+  first; return here once the fix is agreed.
 
-  Do NOT use for pure layout from Figma, Claude Design, screenshots, or an existing visual
-  style ("сверстай", "подвинь блок", responsive) — use layout-writing instead.
+  Do NOT use for pure layout from a design export (Figma, HTML/CSS export, screenshot) or an
+  existing visual style ("сверстай", "подвинь блок", responsive) — use layout-writing instead.
+  For a React/Next.js performance review with no implementation to write — use
+  `vercel-react-best-practices` instead.
   Direct mixed layout + business-logic work uses both layout-writing and code-writing.
 
   For creating a user-spec → user-spec-planning skill.
@@ -55,39 +60,25 @@ description: |
 
 ## Run Fresh Reviews
 
-Run no more than two review waves. One wave launches the complete reviewer set selected for the
-implementation in parallel against the same revision. Use that same complete set in both waves.
-Include reviewers required by other active skills in these same waves instead of starting a
-separate wave sequence.
+After every completed implementation, run the review waves for this change under the shared
+reviewer contract `skill://methodology/references/reviewer-contract.md` ("Review waves";
+"Findings are diagnoses, not a work queue"): wave counts, the complete-set-in-one-wave mechanics,
+stop rules, and findings dispositions live there.
 
-After every completed implementation, include a fresh `code-reviewer` without a model override.
-Its review scope matches the change: a localized edit gets focused connected context; a broad
-change gets all affected contracts and architecture.
+The waves launch the complete reviewer set selected for the implementation in parallel against the
+same revision: always a fresh `fw-code-reviewer` (autoloads `code-reviewing`; never set a model in
+the call, the runtime resolves it from configuration) whose review scope matches the change — a
+localized edit gets focused connected context, a broad change gets all affected contracts and
+architecture — plus `fw-security-reviewer` (autoloads `security-auditor`) when a security boundary
+changed or the user requested a security review, and the `fw-test-reviewer` that `test-master` owns
+when meaningful test code changed, included in every wave for this implementation. Give each
+reviewer the user request or user-spec, applicable repository instructions, validation evidence,
+every touched source file with relevant callers and dependencies, deleted or renamed file evidence,
+and generator/diff/validation evidence for mechanical artifacts.
 
-Also launch in parallel when applicable:
-
-- `security-auditor` when a security boundary changed or the user requested a security review.
-
-`test-master` owns the additional `test-reviewer` invocation when meaningful test code changed.
-Include that reviewer in every wave for this implementation.
-
-Give each reviewer the user request or user-spec, applicable repository instructions, validation
-evidence, every touched source file with relevant callers and dependencies, deleted or renamed
-file evidence, and generator/diff/validation evidence for mechanical artifacts.
-
-Review findings are diagnoses, not a work queue. Check the evidence and exact correction. Apply
-only an authorized local correction to agreed normal behavior. If the scenario is rare or
-unagreed, or the correction adds behavior, state, entities, contracts, dependencies, architecture,
-or material complexity, reject it with a short reason or ask the user before editing.
-`user_decision_required: false` does not replace this check. Reject unsupported findings with
-evidence and report unrelated findings without expanding the task.
-
-After wave 1, correct only authorized local defects in agreed normal behavior that do not require a
-user decision, then rerun affected direct checks. If those corrections changed the reviewed result,
-launch wave 2 with the same complete reviewer set. Stop after a clean wave or when no authorized
-correction changes the result.
-
-After wave 2, do not launch another reviewer automatically. Correct remaining local defects only
-in agreed normal behavior and only when they do not require a user decision, rerun the applicable
-direct checks, and hand off any remaining findings or required decisions about scope, behavior,
-approach, or material complexity. Briefly explain rejected rare findings in the handoff.
+Findings are diagnoses for agreed normal behavior: apply only an authorized local correction, and
+reject unsupported findings with evidence and report unrelated findings without expanding the task.
+Corrections between waves are authorized local defects that need no user decision, each followed by
+rerunning the affected direct checks. After the last wave, hand off the remaining findings and
+required decisions about scope, behavior, approach, or material complexity, briefly explaining
+rejected rare findings.

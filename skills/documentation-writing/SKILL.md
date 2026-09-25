@@ -1,70 +1,41 @@
 ---
 name: documentation-writing
 description: |
-  Creates and maintains project documentation in .claude/skills/project-knowledge/:
+  Creates and maintains project documentation in .agents/skills/project-knowledge/:
   interview, initial Project Knowledge, audit, edit, consistency, and feature finalization.
 
   Use when: "заполни документацию проекта", "опиши проект", "создай Project Knowledge",
   "проведи интервью по проекту", "проверь документацию", "обнови документацию",
   "аудит документации", "plan a new project", "fill project documentation",
-  "check docs", "audit documentation", "update docs"
+  "check docs", "audit documentation", "update docs" — the project's own durable documentation
+  must be created, updated, or audited.
+  For a design-grilling interview that only records ADRs or a glossary for one plan — use
+  `grill-with-docs` instead.
 
   For reading docs or explaining concepts, read project-knowledge skill directly.
 ---
 
 # Documentation Management
 
-Create and maintain `.claude/skills/project-knowledge/` from the evidence source the user named.
+Create and maintain `.agents/skills/project-knowledge/` from the evidence source the user named.
 
 Outside Feature Finalization Mode, follow
 [create-project-knowledge.md](references/create-project-knowledge.md) when the user starts or
 continues initial documentation and either its interview is still in progress or Project Knowledge
 is missing, still a template, or only partially filled. Apply
 [project-knowledge-structures.md](references/project-knowledge-structures.md) for content ownership
-and structure. After writing, run the manual sync and continue at Documentation Review.
+and structure. After writing, continue at Documentation Review.
 
 When the user explicitly asks to reorganize existing Project Knowledge, apply
 [project-knowledge-structures.md](references/project-knowledge-structures.md). Ordinary updates
 preserve the filled structure already in use.
 
-## Manual Project Documentation Sync
+## Project Documentation Sources
 
-Project documentation source of truth is Claude-side: `CLAUDE.md` and `.claude/**`.
-Codex-side `AGENTS.md` and `.codex/**` are generated runtime files.
-No scheduled job performs this conversion. The agent that changes the Claude source runs the
-matching command immediately and reviews the generated result before finishing the task.
-
-After changing a project `CLAUDE.md` or any project-local `.claude/**` file, immediately run:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply
-```
-
-If sync reports a conflict, stop and report it. Commit generated project `.codex/**` / `AGENTS.md`
-changes with their Claude sources, except `.codex/.sync/**`, which is host-local runtime state.
-When an approved deletion or rename produces `orphaned managed` outputs, verify that every reported
-path corresponds to that approved source change, then remove those generated leftovers with:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply --prune --confirm-delete
-```
-
-If the orphan list contains anything else, stop and report it instead of pruning unrelated output.
-
-### Nested Agent Workspaces
-
-Some projects keep an agent workspace under a subdirectory (for example
-`nested-workspace/.claude/**`) while the repository root exposes selected skills or
-agents through symlinks in root `.claude/**`. In that case, sync both levels:
-
-```bash
-~/.claude/scripts/sync-to-codex.sh --project "$PWD/nested-workspace" --apply
-~/.claude/scripts/sync-to-codex.sh --project "$PWD" --apply
-```
-
-Verify root `.codex/agents` / `.codex/skills` include every root-exposed agent or skill. A
-generated file existing only inside the nested workspace is not enough when the root runtime
-must invoke it. Treat `.codex/.sync/**` as host-local evidence: do not commit or synchronize it.
+A project keeps exactly two hand-written documentation sources: the root `AGENTS.md` entry point
+and `.agents/skills/project-knowledge/`. Nothing is generated from them, so there is no mirror, no
+conversion step, and no sync command. Keep both current in the same task that changes a documented
+fact and commit them together.
 
 ## Documentation Principles
 
@@ -110,7 +81,7 @@ Use the narrowest mode that matches the user's request:
    interpret it.
 3. **Recent history:** when the user asks for the last N commits, inspect those N commits and their
    resulting current code.
-4. **Full update or audit:** inspect current code, all Project Knowledge, and `CLAUDE.md`.
+4. **Full update or audit:** inspect current code, all Project Knowledge, and `AGENTS.md`.
 5. **Specific documentation edit, consistency check, or status:** inspect the named section and the
    documentation it can contradict.
 6. **Feature finalization:** use this mode only when the user explicitly asks to finish a feature
@@ -137,27 +108,23 @@ Do not search for `user-spec.md` or require it outside feature-finalization mode
 2. For an audit, consistency check, or status request, report evidence-backed issues without
    changing files unless the user also asked for fixes. Status classifications are filled, partial,
    template, or missing; size alone does not determine status.
-3. After changing a project `CLAUDE.md` or project-local `.claude/**`, run the manual sync described
-   above. For a nested workspace, sync the nested source first and the repository root second.
+3. Keep the `AGENTS.md` entry point and the Project Knowledge references consistent with the facts
+   just changed; update both in the same task.
 
 ## Documentation Review
 
-1. Run no more than two review waves. After documentation edits, run wave 1 with a fresh
-   `documentation-reviewer` with no model override. Give it the complete touched documents, the
-   selected evidence boundary, related code and contracts, and the user's request. It returns its
-   JSON result directly. Include reviewers required by other active skills in these same waves
-   instead of starting a separate wave sequence.
-2. Review findings are diagnoses, not a work queue. Check the evidence and exact correction; apply
-   only an authorized local correction to agreed normal documentation. If the scenario is rare or
-   unagreed, or the correction adds behavior, state, entities, contracts, dependencies,
-   architecture, or material complexity, reject it with a short reason or ask the user before
-   editing. `user_decision_required: false` does not replace this check. Surface unrelated
-   pre-existing defects without changing them.
-3. If an accepted correction changes the reviewed documentation, run wave 2 with a fresh reviewer.
-   Stop after a clean wave or when no authorized correction changes the documentation.
-4. After wave 2, do not launch another reviewer automatically. Make only remaining local corrections
-   inside the requested documentation change, run the applicable direct checks and manual sync, and
-   show the user any remaining findings or required decisions.
+1. Run the review waves for the touched documents under the shared reviewer contract
+   `skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
+   "Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
+   live there. Wave 1 is a fresh `fw-docs-reviewer` (autoloads `documentation-writing`) with the
+   complete touched documents, the selected evidence boundary, related code and contracts, and the
+   user's request; it returns its JSON result directly, and a later wave re-reviews the corrected
+   documentation with a fresh reviewer.
+2. Findings are diagnoses for agreed normal documentation: apply only an authorized local
+   correction. Surface unrelated pre-existing defects without changing them.
+3. After the final permitted wave, make only remaining local corrections inside the requested
+   documentation change, run the applicable direct checks, and show the user any remaining findings
+   or required decisions.
 
 ## Feature Finalization Mode
 
@@ -179,9 +146,10 @@ finalization commit.
 
 ## Agent Entry Point
 
-Keep `CLAUDE.md` minimal: project name, one-line description, reference to the Project Knowledge
-skill, backlog path, and default branch. Detailed project information belongs in Project Knowledge.
-Template: `~/.claude/skills/project-initialization/assets/new-project/CLAUDE.md`.
+Keep `AGENTS.md` as the compact entry rulebook it is: language, behavior, task scope, worktrees, and
+security. Detailed project information belongs in Project Knowledge
+(`.agents/skills/project-knowledge/`), not in `AGENTS.md`.
+Template: `~/.agents/skills/project-initialization/assets/new-project/AGENTS.md`.
 
 ## Self-Verification
 

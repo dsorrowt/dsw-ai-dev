@@ -7,7 +7,7 @@ remains the owner of approved current facts.
 
 ## Phase 0: Start or Resume
 
-1. Inspect the repository, configuration, `CLAUDE.md`, and current Project Knowledge.
+1. Inspect the repository, configuration, `AGENTS.md`, and current Project Knowledge.
 2. If an in-progress interview exists, summarize its recorded topics and decisions, then resume
    from the earliest incomplete topic or unrecorded approval. If no interview exists, create
    `work/project-knowledge/` and copy the bundled `../assets/project-knowledge-interview.yml`
@@ -90,7 +90,7 @@ has corrected the final summary.
 1. Apply [project-knowledge-structures.md](project-knowledge-structures.md). Preserve an existing
    suitable topology without asking for it again; when a new topology or explicit reorganization is
    needed, obtain the user's choice before writing it.
-2. Write durable project facts in English. Replace template placeholders and keep `CLAUDE.md` as a
+2. Write durable project facts in English. Replace template placeholders and keep `AGENTS.md` as a
    compact entrypoint.
 3. If post-launch ideas were discussed, offer to add them to the existing backlog. When the project
    has no backlog convention, ask where to put them instead of inventing a second convention.
