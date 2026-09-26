@@ -1,21 +1,21 @@
 ---
 name: documentation-writing
-description: |
-  Creates and maintains project documentation in .agents/skills/project-knowledge/:
-  interview, initial Project Knowledge, audit, edit, consistency, and feature finalization.
-
-  Use when: "заполни документацию проекта", "опиши проект", "создай Project Knowledge",
-  "проведи интервью по проекту", "проверь документацию", "обнови документацию",
-  "аудит документации", "plan a new project", "fill project documentation",
-  "check docs", "audit documentation", "update docs" — the project's own durable documentation
-  must be created, updated, or audited.
-  For a design-grilling interview that only records ADRs or a glossary for one plan — use
-  `grill-with-docs` instead.
-
-  For reading docs or explaining concepts, read project-knowledge skill directly.
+description: Creates, updates, audits Project Knowledge docs; "обнови документацию"; not ADR grilling
 ---
 
 # Documentation Management
+
+## When to Use
+
+Use when: "заполни документацию проекта", "опиши проект", "создай Project Knowledge",
+"проведи интервью по проекту", "проверь документацию", "обнови документацию",
+"аудит документации", "plan a new project", "fill project documentation",
+"check docs", "audit documentation", "update docs" — the project's own durable documentation
+must be created, updated, or audited.
+For a design-grilling interview that only records ADRs or a glossary for one plan — use
+`grill-with-docs` instead.
+
+For reading docs or explaining concepts, read project-knowledge skill directly.
 
 Create and maintain `.agents/skills/project-knowledge/` from the evidence source the user named.
 

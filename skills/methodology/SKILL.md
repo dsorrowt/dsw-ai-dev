@@ -1,15 +1,14 @@
 ---
 name: methodology
-description: |
-  Explains the current AI-First development methodology: skill routing, Project Knowledge,
-  user-spec planning and execution, evidence-gated reviews, reviewer roles, feature finalization,
-  and model classes.
-
-  Use when: "изучи методологию", "как работает пайплайн", "как делать фичи",
-  "как устроены скиллы", "how does the methodology work", "explain the workflow"
+description: Explains the methodology — pipeline, skills, routing; "как работает пайплайн"
 ---
 
 # AI-First Development Methodology
+
+## When to Use
+
+Use when: "изучи методологию", "как работает пайплайн", "как делать фичи",
+"как устроены скиллы", "how does the methodology work", "explain the workflow"
 
 ## Purpose
 

@@ -1,16 +1,16 @@
 ---
 name: infrastructure-setup
-description: |
-  Provides project infrastructure conventions and review criteria for local setup, Docker,
-  Git hooks, CI/CD, service delivery, release artifacts, monitoring, backups, and operations.
-
-  Use when: "настрой инфраструктуру", "измени CI/CD", "подготовь деплой", "настрой Docker",
-  "собери release artifact", "настрой мониторинг", "проверь инфраструктуру", "оцени деплой",
-  "setup infrastructure", "review infrastructure"
-  Do NOT use for: choosing or writing application tests without an infrastructure change.
+description: Infra, Docker, CI/CD, deploy, monitoring, backups; "настрой инфраструктуру"; not app tests
 ---
 
 # Infrastructure Conventions
+
+## When to Use
+
+Use when: "настрой инфраструктуру", "измени CI/CD", "подготовь деплой", "настрой Docker",
+"собери release artifact", "настрой мониторинг", "проверь инфраструктуру", "оцени деплой",
+"setup infrastructure", "review infrastructure"
+Do NOT use for: choosing or writing application tests without an infrastructure change.
 
 ## Scope and Judgment
 

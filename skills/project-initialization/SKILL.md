@@ -1,14 +1,13 @@
 ---
 name: project-initialization
-description: |
-  Initializes a project from the standard omp/pi template, preserves existing files, registers the
-  project in Orca on this host, and creates or connects a private GitHub repository with main and
-  dev branches.
-
-  Use when: "инициализируй проект", "создай новый проект", "init project", "initialize project"
+description: Initializes new projects ("инициализируй проект", template, Orca, GitHub repo)
 ---
 
 # Project Initialization
+
+## When to Use
+
+Use when: "инициализируй проект", "создай новый проект", "init project", "initialize project"
 
 Initialize the project in the current working directory. Existing project files are preserved in
 an `old*` directory for later review; do not merge them into the new scaffold during this workflow.

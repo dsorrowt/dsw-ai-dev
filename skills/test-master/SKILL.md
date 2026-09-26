@@ -1,14 +1,15 @@
 ---
 name: test-master
-description: |
-  Guides test selection, authoring, and quality review at the smallest reliable boundary.
-
-  Use when: "напиши тесты", "как тестировать", "проанализируй тесты", "проверь качество тестов", "ревью тестов", "тестовая стратегия" — the tests protecting an agreed change must be selected, authored, or reviewed.
-  For building a feature test-first through the red-green-refactor loop — use `tdd` instead.
-  For driving a local web app or a Playwright suite in a browser — use `webapp-testing` or `playwright-cli` instead.
+description: Test selection, authoring, review; "напиши тесты"; not TDD or browser
 ---
 
 # Test Master
+
+## When to Use
+
+Use when: "напиши тесты", "как тестировать", "проанализируй тесты", "проверь качество тестов", "ревью тестов", "тестовая стратегия" — the tests protecting an agreed change must be selected, authored, or reviewed.
+For building a feature test-first through the red-green-refactor loop — use `tdd` instead.
+For driving a local web app or a Playwright suite in a browser — use `webapp-testing` or `playwright-cli` instead.
 
 ## Decide What to Protect
 

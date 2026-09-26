@@ -1,20 +1,23 @@
 ---
 name: code-reviewing
-description: |
-  Reviews code against the user request, project conventions, cross-file contracts, and applicable quality risks.
-  Use when: "проверь код", "code review", "ревью кода", "review this code", "check code quality" —
-  the review step of an agreed change: the review wave that judges the implementation before handoff.
-  Do NOT use for a post-hoc two-axis comparison of an unrelated commit range against a fixed point —
-  use `code-review` instead.
+description: Reviews code against request, conventions, contracts; "проверь код", "ревью кода"
 ---
 
 # Code Reviewing
+
+## When to Use
+
+Use when: "проверь код", "code review", "ревью кода", "review this code", "check code quality" —
+the review step of an agreed change: the review wave that judges the implementation before handoff.
+Do NOT use for a post-hoc two-axis comparison of an unrelated commit range against a fixed point —
+use `code-review` instead.
 
 Function length, nesting, broad types, hardcoded values, repeated resource construction, or
 multiple mocks are signals to investigate; they are not defects by themselves.
 
 ## Contents
 
+- [When to Use](#when-to-use)
 - [Always Review](#always-review)
 - [Review When Applicable](#review-when-applicable)
 

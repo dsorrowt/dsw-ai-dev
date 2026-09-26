@@ -1,14 +1,15 @@
 ---
 name: security-auditor
-description: |
-  Analyzes changed security boundaries against applicable OWASP risks and project contracts.
-  Use after `fw-code-reviewer` when authentication, authorization, untrusted input, secrets, sensitive data, database queries, file paths, rendering, or external APIs changed.
-
-  Use when: "проверь безопасность", "security audit", "найди уязвимости", "check security"
-  Do NOT use for: general code review (use `fw-code-reviewer`), test quality review (use `fw-test-reviewer`)
+description: Analyzes changed security boundaries against applicable OWASP risks; "проверь безопасность"
 ---
 
 # Security Auditor
+
+## When to Use
+
+Use when: "проверь безопасность", "security audit", "найди уязвимости", "check security"
+Use after `fw-code-reviewer` when authentication, authorization, untrusted input, secrets, sensitive data, database queries, file paths, rendering, or external APIs changed.
+Do NOT use for: general code review (use `fw-code-reviewer`), test quality review (use `fw-test-reviewer`)
 
 ## Applicable Risks
 

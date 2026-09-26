@@ -1,16 +1,17 @@
 ---
 name: skill-master
-description: |
-  Guides skill creation and updates with specialized knowledge and workflows.
-
-  Use when: "создай скилл", "измени скилл", "гайд по скиллам", "обнови скилл", "улучши скилл",
-  "create skill", "update skill", "skill guide", "new skill", "how to write a skill"
-
-  Do NOT use for updating, re-fetching, or restoring a vendored skill from its upstream source —
-  use `update-skills` instead.
+description: Guides skill creation and updates; "создай скилл"; not vendored updates
 ---
 
 # Skill Creator
+
+## When to Use
+
+Use when: "создай скилл", "измени скилл", "гайд по скиллам", "обнови скилл", "улучши скилл",
+"create skill", "update skill", "skill guide", "new skill", "how to write a skill"
+
+Do NOT use for updating, re-fetching, or restoring a vendored skill from its upstream source —
+use `update-skills` instead.
 
 ## About Skills
 
@@ -83,46 +84,53 @@ skill-name/
 
 **`description`** (required):
 - Third person ("Analyzes code...", NOT "I analyze...")
-- Include both WHAT the skill does AND WHEN to use it
-- ≤1024 characters
+- One line, and a plain scalar: `description: <text>` with no block scalar (`|`, `>-`) and no second
+  line.
+- The session prompt renders it verbatim only when it is a single line of ≤12 words and ≤160
+  characters. Longer text is truncated to the first line plus "…" and then lossily compressed, so
+  anything past that budget is unreliable.
+- Sentence case, no trailing period.
+- Include both WHAT the skill does AND WHEN to use it within that budget.
 
 #### Description Best Practices
 
-The runtime uses the description to decide when to auto-invoke the skill. Be specific and include
-key terms.
+The runtime puts the description in the session prompt and uses it to decide when to auto-invoke
+the skill. Be specific, and fit the key terms into that one line: the trigger terms users actually
+say must be part of it.
 
 **Template:**
 ```yaml
-description: |
-  [What the skill does — be specific, include key terms]
-
-  Use when: [trigger conditions — specific phrases users say]
+description: <what the skill does>; <strongest trigger terms>; not <near-miss>
 ```
+
+Fuller routing guidance belongs in the body, not the description: put the `Use when:` list, the
+near-misses, and the cross-references into a `## When to Use` section right after the H1, where
+they cost no prompt budget. Only the WHAT phrase and the strongest triggers stay in the
+description.
 
 Use concrete positive routing: name the real intents and only the wording variations needed to
 distinguish the skill's domain.
 
 **Bad:**
 ```yaml
-description: This skill helps with documents. Use when user wants to work with docs.
+description: |
+  This skill helps with documents.
+
+  Use when: user wants to work with docs, fills documentation, checks documentation, updates
+  documentation, audits documentation, plans a new project.
 ```
 **Good:**
 ```yaml
-description: |
-  Manage .agents/skills/project-knowledge/ docs: create, check, update.
-
-  Use when: "заполни документацию", "создай документацию", "проверь документацию", "обнови документацию"
+description: Manages Project Knowledge docs; "заполни документацию"; not ADR-only grilling
 ```
 #### Negative Triggers
 
-Add an explicit "do not use for" line only when the skill genuinely overlaps a neighboring skill or has a plausible near-miss. Negative routing should resolve a real ambiguity, not pad the description.
+Add a "not for ..." clause to the same line only when the skill genuinely overlaps a neighboring
+skill or has a plausible near-miss, and only while the line budget still fits. Negative routing
+should resolve a real ambiguity, not pad the line.
 
 ```yaml
-description: |
-  Analyze SQL query performance and suggest index changes.
-
-  Use when: "why is this query slow", "optimize this SELECT", "add an index"
-  Do NOT use for: writing new queries from scratch, schema design, data migrations.
+description: Writes tests at the smallest reliable boundary; "напиши тесты"; not TDD
 ```
 
 **Need `disable-model-invocation` or another optional field?** Read
@@ -222,7 +230,7 @@ Think of the agent as exploring a path: a narrow bridge with cliffs needs specif
 
 Skills use a three-level loading system to manage context efficiently:
 
-1. **Metadata (name + description)** — Always in context (~100 words)
+1. **Metadata (name + description)** — always in context as the rendered one-line description (≤12 words)
 2. **SKILL.md body** — When skill triggers (<5k words)
 3. **Bundled resources** — As needed by the agent (unlimited, scripts execute without reading)
 

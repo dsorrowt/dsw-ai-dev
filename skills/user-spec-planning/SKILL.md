@@ -1,17 +1,18 @@
 ---
 name: user-spec-planning
-description: |
-  Creates user-spec.md through adaptive interview, codebase research, and three-lane validation.
-
-  Use when: "сделай юзер спек", "проведи интервью для юзер спека",
-  "создай юзерспек", "user spec", "detailed planning", "хочу продумать фичу",
-  "опиши требования к фиче", "сделай описание фичи", "/new-user-spec" — the planning process that
-  ends in an approved `work/{feature}/user-spec.md` for this methodology's implementation pipeline.
-  For a design-grilling interview that only sharpens a plan and records ADRs or a glossary, use
-  `grill-with-docs` instead.
+description: Creates user-spec.md via interview and research; "сделай юзер спек"; not ADRs
 ---
 
 # User Spec Planning
+
+## When to Use
+
+Use when: "сделай юзер спек", "проведи интервью для юзер спека",
+"создай юзерспек", "user spec", "detailed planning", "хочу продумать фичу",
+"опиши требования к фиче", "сделай описание фичи", "/new-user-spec" — the planning process that
+ends in an approved `work/{feature}/user-spec.md` for this methodology's implementation pipeline.
+For a design-grilling interview that only sharpens a plan and records ADRs or a glossary, use
+`grill-with-docs` instead.
 
 Thorough adaptive interview → codebase research → completeness review → user-spec.md → three-lane
 validation → user approval. Output: `work/{feature}/user-spec.md` with status `approved`.

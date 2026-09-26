@@ -1,12 +1,13 @@
 ---
 name: prompt-master
-description: |
-  Creates, improves, and reviews LLM prompts using concise, task-aware guidance.
-
-  Use when: "напиши промпт", "улучши промпт", "prompt engineering", "проверь промпт"
+description: Creates, improves, reviews LLM prompts; "напиши промпт", "улучши промпт"
 ---
 
 # Prompt Master
+
+## When to Use
+
+Use when: "напиши промпт", "улучши промпт", "prompt engineering", "проверь промпт"
 
 Treat a prompt as a clear task contract. Add information that changes the result; do not add a
 technique merely because it is common in prompt-engineering guides.

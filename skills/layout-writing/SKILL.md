@@ -1,13 +1,15 @@
 ---
 name: layout-writing
-description: |
-  Reproduces and adjusts web layouts from a design export (Figma, HTML/CSS export, screenshot) or an existing project style with high visual fidelity and proportional verification.
-  Use when: "сверстай по Figma", "поправь вёрстку", "подвинь блок", "перенеси из макета", "сделай адаптив", "добавь в том же стиле", "implement layout", "match Figma", "fix responsive layout" — a layout must be implemented or adjusted against a source or an existing project style.
-  For blank-slate visual design with no source to match — use `frontend-design` instead.
-  Use alongside code-writing for mixed layout and business-logic tasks; use code-writing alone for logic-only work.
+description: Implements or adjusts layouts to match Figma/макет/вёрстка/адаптив; not blank-slate design
 ---
 
 # Layout Writing
+
+## When to Use
+
+Use when: "сверстай по Figma", "поправь вёрстку", "подвинь блок", "перенеси из макета", "сделай адаптив", "добавь в том же стиле", "implement layout", "match Figma", "fix responsive layout" — a layout must be implemented or adjusted against a source or an existing project style.
+For blank-slate visual design with no source to match — use `frontend-design` instead.
+Use alongside code-writing for mixed layout and business-logic tasks; use code-writing alone for logic-only work.
 
 Deliver a layout that matches its exact source where one exists, fills only genuinely unspecified
 decisions from project evidence, and works at relevant widths in the existing codebase.

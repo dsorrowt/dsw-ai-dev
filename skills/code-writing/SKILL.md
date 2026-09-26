@@ -1,24 +1,26 @@
 ---
 name: code-writing
-description: |
-  Guides code implementation through proportional context reading, focused changes, verification, and fresh reviews.
-  Use whenever code needs to be written — from a short ad-hoc edit to a full user-spec.
-
-  Use when: "напиши код", "закодь", "реализуй", "write code", "implement" — the target behavior is
-  already agreed (an explicit request or a user-spec) and now has to be implemented.
-  For an unexplained failure whose cause is still unknown, diagnose it with `diagnosing-bugs`
-  first; return here once the fix is agreed.
-
-  Do NOT use for pure layout from a design export (Figma, HTML/CSS export, screenshot) or an
-  existing visual style ("сверстай", "подвинь блок", responsive) — use layout-writing instead.
-  For a React/Next.js performance review with no implementation to write — use
-  `vercel-react-best-practices` instead.
-  Direct mixed layout + business-logic work uses both layout-writing and code-writing.
-
-  For creating a user-spec → user-spec-planning skill.
+description: Implements agreed behavior ("напиши код", "реализуй", "implement"); not layout-only
 ---
 
 # Code Writing
+
+## When to Use
+
+Use whenever code needs to be written — from a short ad-hoc edit to a full user-spec.
+
+Use when: "напиши код", "закодь", "реализуй", "write code", "implement" — the target behavior is
+already agreed (an explicit request or a user-spec) and now has to be implemented.
+For an unexplained failure whose cause is still unknown, diagnose it with `diagnosing-bugs`
+first; return here once the fix is agreed.
+
+Do NOT use for pure layout from a design export (Figma, HTML/CSS export, screenshot) or an
+existing visual style ("сверстай", "подвинь блок", responsive) — use layout-writing instead.
+For a React/Next.js performance review with no implementation to write — use
+`vercel-react-best-practices` instead.
+Direct mixed layout + business-logic work uses both layout-writing and code-writing.
+
+For creating a user-spec → user-spec-planning skill.
 
 ## Understand the Change
 
