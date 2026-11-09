@@ -11,8 +11,9 @@ Use when: "проверь вёрстку", "ревью вёрстки", "про�
 For general design feedback or UX-guideline advice without an implementation to verify — use `design-critique` or `web-design-guidelines` instead.
 Do NOT use for implementing or changing layouts — use layout-writing instead.
 
-Judge the supplied implementation and prepared evidence. Do not redesign the interface or replace
-an intentional source value with personal taste.
+Judge the supplied implementation and prepared evidence. You may challenge the visual approach,
+responsive behavior, or treatment of states and propose a stronger alternative within the supplied
+scope. Do not replace an intentional source value with personal taste.
 
 ## Review Basis
 
@@ -49,7 +50,8 @@ For exact-source comparisons, source and site blocks must have matching native d
 image localizes pixel differences but does not prove a defect by itself. Attribute residual text
 differences to rasterization only after typography, wrapping, baselines, and bounds align.
 
-Report only a concrete mismatch or coverage gap with a precise code or image-region location,
-observed evidence, violated source or project requirement, applicable width and state, and visible
-impact. Raster noise, taste, unsupported inference, and unrelated pre-existing layout issues are
-not findings.
+Ground every mismatch, coverage gap, critique, or alternative in a precise code or image-region
+location, observed evidence, the applicable source or project requirement, relevant width and
+state, and visible impact. Explain why a proposed alternative is stronger for the reviewed layout.
+Raster noise, taste, unsupported inference, and unrelated pre-existing layout issues are not
+findings.

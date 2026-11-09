@@ -16,6 +16,9 @@ For driving a local web app or a Playwright suite in a browser — use `webapp-t
 Tests protect observable behavior or another explicit contract that must survive change. Trace
 each selected scenario to the user request, user-spec, or changed project contract.
 
+Automated tests apply only to deterministic executable code; LLM-produced results and
+presentation-only layout use agent, manual, or visual verification instead.
+
 Freely editable copy, presentation-only markup or styles, constants that merely repeat their
 source value, and framework behavior normally have no test subject. They become testable when an
 explicit user, accessibility, legal, safety, protocol, or project requirement makes their
@@ -60,11 +63,22 @@ When authoring a selected type, apply its conditional guide:
 ## Test Review
 
 When meaningful test code changes, include a fresh `fw-test-reviewer` (autoloads `test-master`) in
-the review wave with the complete touched test code and its contracts supplied.
+the review stage with the complete touched test code and its contracts supplied. Supply the changed
+tests and implementation, behavior requirements and contracts, direct validation evidence, and a
+short explanation of what changed, how the tested behavior works, why the test boundary and
+scenarios were chosen, deliberate limits, and assumptions. The reviewer verifies that explanation
+as a claim rather than accepting it as authority. It may challenge the test approach or boundary
+and propose a better boundary or additional scenario when supported by the test-quality evidence.
+
 For a user-requested review of existing tests, apply
 [test-quality-review.md](references/test-quality-review.md) — demonstrated coverage gaps,
 boundary problems, and ineffective tests.
 
-Reviewer severity follows the concrete regression that can pass undetected, not the category or
-appearance of the test problem. Naming preferences and optional improvements without concrete
-impact are not findings.
+When severity is reported, it follows the concrete regression that can pass undetected, not the
+category or appearance of the test problem. Naming preferences and optional improvements without
+concrete impact are not findings.
+
+After the review, do not add or change tests from its findings and do not repeat the review
+automatically. Explain what tests you changed and what behavior they prove, then what the reviewer
+found, what it can cause, whether you agree and why, and what you recommend. Wait for the user's
+approval before editing.

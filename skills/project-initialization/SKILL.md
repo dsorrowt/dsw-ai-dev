@@ -1,6 +1,6 @@
 ---
 name: project-initialization
-description: Initializes new projects ("инициализируй проект", template, Orca, GitHub repo)
+description: Initializes software or skills-workspace projects; "инициализируй проект"
 ---
 
 # Project Initialization
@@ -30,6 +30,9 @@ until the user chooses.
 Resolve the directory of this loaded `project-initialization` skill and set `INIT_SKILL_DIR` to that
 absolute path. Verify that its `assets/new-project/` directory exists before moving project files.
 
+Determine whether this is a software project (`main` + `dev`) or a skills workspace (`main` only).
+Use the request and existing project context; ask if the type is unclear.
+
 ## 2. Preserve Existing Files and Apply the Template
 
 If the current directory contains anything other than `.git`, move all such entries into the first
@@ -48,16 +51,23 @@ fi
 cp -rp "$INIT_SKILL_DIR/assets/new-project/." .
 ```
 
-If `OLD_DIR` is non-empty, inspect it for `.env*`, `*.key`, `*.pem`, `credentials.json`, and
-`secrets/`. Ensure every sensitive path is covered by the new `.gitignore` before staging files.
-Never print secret contents.
+If `OLD_DIR` is non-empty, add its exact root-relative directory (for example `/old2/`) to the
+new root `.gitignore`. Keep the archive local and untracked so tooling does not treat its saved
+agent configuration as another active project. Do not stage the archive.
+
+Before staging, set **Default branch** in the copied `AGENTS.md` to `dev` for software or `main`
+for a skills workspace. For a skills workspace, also replace **Branch Structure** and the
+**Integration** rules in `.agents/skills/project-knowledge/references/patterns.md` with a single
+`main` branch for active work, remove the merge-to-`dev` and merge-to-`main` testing requirements,
+and replace the squash-integration rule in `AGENTS.md` with direct commits to `main`.
 
 ## 3. Initialize Git
 
 Initialize Git with `main` as the primary branch when needed. For an existing repository, preserve
 its history and make the current primary branch `main`. Then:
 
-1. Stage the scaffold and preserved `old*` directory, subject to the secret check above.
+1. Stage the scaffold and tracked deletions caused by the move. Keep the ignored `old*` archive
+   untracked.
 2. Create the first initialization commit. If the repository already has history, create a normal
    initialization commit instead of rewriting existing commits.
 
@@ -72,12 +82,14 @@ GitHub is required for this workflow. Verify that `gh` is installed and authenti
   supplied name authorizes creating the private repository. Create it with
   `gh repo create {name} --private --source=. --remote=origin`.
 
-Before any push, inspect whether a local or remote `dev` branch already exists. If neither exists,
-create `dev` from `main`. If either exists, show its relationship to `main` and ask whether to reuse
-it; never reset or recreate an existing `dev`, and stop if local and remote histories conflict.
+For software projects, before any push inspect whether a local or remote `dev` branch already
+exists. If neither exists, create `dev` from `main`. If either exists, show its relationship to
+`main` and ask whether to reuse it; never reset or recreate an existing `dev`, and stop if local
+and remote histories conflict. For a skills workspace, use `main` without creating `dev`.
 
-Ask explicitly before pushing `main`. After approval, push `main`, push the created or approved
-`dev`, leave `dev` checked out, and read the canonical repository URL through `gh`.
+Ask explicitly before pushing `main`. After approval, push `main`; for software also push the
+created or approved `dev` and leave `dev` checked out. For a skills workspace, leave `main` checked
+out. Read the canonical repository URL through `gh`.
 
 ## 5. Register the Project in Orca
 
@@ -121,10 +133,10 @@ work needs a fresh context, ask Orca for a worktree.
 Report:
 
 - the GitHub URL;
-- the created or reused `main` and `dev` branches;
+- the created or reused branches: `main` and `dev` for software, `main` for a skills workspace;
 - the Orca project id and the setup state for this host, or why registration was skipped;
-- the preserved `old*` directory, or that the directory was initially empty;
-- that `dev` is the active branch;
+- the preserved local, Git-ignored `old*` directory, or that the directory was initially empty;
+- the active branch: `dev` for software or `main` for a skills workspace;
 - that the project `README.md` carries the one-time trust step for `pi`;
 - the next step: create the initial Project Knowledge with `documentation-writing`.
 

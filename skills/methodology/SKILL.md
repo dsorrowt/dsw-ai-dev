@@ -67,7 +67,7 @@ feature, so `work/` planning artifacts never enter shared history.
 5. Fill the bundled user-spec template in place. Keep its scaffold in English, write its content
    in the user's language, preserve the executor instruction, and commit the draft.
 6. Validate every round in parallel with:
-   - `fw-uspec-quality` for document quality, coverage, and testable criteria;
+   - `fw-uspec-quality` for document quality, behavioral clarity, and verification;
    - `fw-uspec-adequacy` for feasibility, proportionality, and architecture fit;
    - `fw-skeptic` for factual claims about the current codebase.
 7. Stop when all lanes are clean or after the third validation round. Obtain explicit user
@@ -131,22 +131,23 @@ at the smallest useful boundary. Broader or cross-cutting work loads the contrac
 Knowledge routes it actually affects.
 
 A risk, idea, edge case, or improvement discovered during implementation or review is a proposal,
-not new authorization. The executor may correct a local defect required for the agreed result; a
-change to behavior, scope, approach, state, fallback, validation, or material complexity returns
-to the user for a decision.
+not new authorization. The executor may correct a local defect it finds during implementation or
+direct checks before review; a change to behavior, scope, approach, state, fallback, validation, or
+material complexity returns to the user for a decision. Reviewer findings also return to the user.
 
 ## New Projects and Project Knowledge
 
 `project-initialization` creates a repository from its bundled template, preserves
-pre-existing files in the next available `old*` directory,
+pre-existing files in the next available local, Git-ignored `old*` directory,
 creates the initialization commit, connects a private GitHub
-repository, creates `main` and `dev`, and leaves `dev` active. Reviewing or merging preserved
-`old*` files is separate work.
+repository, and creates `main` plus an active `dev` for software projects, or `main` only for a
+skills workspace. Reviewing or merging preserved `old*` files is separate work.
 
 The next step is initial Project Knowledge through `documentation-writing`. Its adaptive interview
 derives what it can from the repository, uses as many question batches as needed, obtains
 checkpoint agreement for project definition, architecture, and operations/experience, proposes a
-documentation topology when one is not already established, and writes durable facts in English.
+documentation topology when one is not already established, and prepares durable facts in English.
+It presents the exact Project Knowledge diff for approval before writing.
 
 Project Knowledge lives in `.agents/skills/project-knowledge/`, whose `SKILL.md` is always the
 router. Use structure by context boundary rather than file size:
@@ -166,8 +167,8 @@ and security — instead of a project fact sheet. Project Knowledge lives in
 
 ### Approved User Spec
 
-`work/{feature}/user-spec.md` owns the agreed feature outcome, behavior, acceptance criteria,
-constraints, risks, accepted decisions, testing intent, and verification plan.
+`work/{feature}/user-spec.md` owns the agreed feature outcome, behavior, scope and constraints,
+risks, accepted decisions, and acceptance and verification plan.
 
 ### Project Knowledge
 
@@ -219,17 +220,18 @@ relying on unrelated global directories.
 Reusable methodology lives in skills. Dedicated `fw-*` reviewer agents add fresh isolated context,
 a bounded skeptical role, the minimum tools needed to inspect evidence, and a structured diagnostic
 result. Their model comes from runtime configuration, never from the caller; reviewer roles run in
-the `good` class. They do not edit artifacts, design remediation, or decide whether work ships. The
-shared stance, result schema, review-loop limit, and findings handling are defined once in
-[references/reviewer-contract.md](references/reviewer-contract.md), which every reviewer reads
-before reporting. Its "Review waves" and "Findings are diagnoses, not a work queue" sections carry
-the shared wave mechanics and the findings rules — the complete-set wave, the wave counts, the
-stop rules, the diagnose-then-authorize sequence — so no skill restates them.
+the `good` class. They do not edit artifacts or decide whether work ships; within their lane they
+may challenge the chosen approach, complexity, or missing possibilities and describe a useful
+alternative. The shared stance, result schema, review-stage rule, and findings handling are defined
+once in [references/reviewer-contract.md](references/reviewer-contract.md), which every reviewer
+reads before reporting.
 
-A finding is valid only when it establishes a concrete location, observed evidence, violated
-requirement, realistic triggering conditions, and impact — the contract's evidence gate. A clean
-result is valid. The orchestrator applies only an authorized correction, one inside the user
-request, approved plan, or user-spec, exactly as the contract's findings rule states.
+Before the first review, the orchestrator selects the complete reviewer set required by all active
+skills and launches it against one artifact revision as a single review stage. After reviewers
+return, apply no finding and do not repeat the review automatically: explain what changed and how
+it works, what reviewers found, what it can cause, whether you agree and why, and what you
+recommend. Only explicit approval of specific changes starts a correction cycle. A clean result is
+valid. The separate user-spec validation process still allows at most three rounds.
 
 Common reviewer ownership is:
 
@@ -257,7 +259,7 @@ or agent file ever carries it.
 ## Orchestration: one step, one orchestrator
 
 Fresh context is the anti-anchoring mechanism. In omp a subagent is already isolated. In pi only an
-orca worker gives fresh context — a separate process in an orca worktree: run the review wave before
+orca worker gives fresh context — a separate process in an orca worktree: run the review stage before
 delivering large work, omp↔pi handoffs, and file-isolated tasks through the `orca` CLI; within one pi
 session independence is not guaranteed.
 
@@ -265,7 +267,7 @@ The in-session `task` tool and an orca worker are two different orchestrators, a
 exactly one of them. Use `task` when the work stays entirely inside the current session and runtime:
 quick local checks and decomposition into bounded subtasks. Its subagents are child sessions of the
 same harness and die with the session. Use an orca worker when at least one worker condition holds —
-the review wave before delivering large work, an omp↔pi handoff, file isolation — or when the result
+the review stage before delivering large work, an omp↔pi handoff, file isolation — or when the result
 must outlive the session or run in another runtime. When in doubt, choose by this rule instead of
 spawning both in one step: neither runtime documents the semantics of mixing the two.
 
@@ -281,7 +283,7 @@ spoken.
 - **Proportional context:** load the smallest context that preserves the affected contracts.
 - **One outcome, one user-facing specification:** split only independently valuable outcomes and
   let the user decide.
-- **Evidence before action:** reviewer identity or severity never substitutes for evidence, and a
+- **Evidence before action:** reviewer identity or severity label never substitutes for evidence, and a
   finding never expands authorization.
 - **Stable commits:** commit meaningful states such as a draft spec, approved spec, verified
   implementation, or finalized documentation; do not force incidental state into a commit.

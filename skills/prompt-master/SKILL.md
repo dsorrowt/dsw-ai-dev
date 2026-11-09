@@ -7,7 +7,10 @@ description: Creates, improves, reviews LLM prompts; "напиши промпт"
 
 ## When to Use
 
-Use when: "напиши промпт", "улучши промпт", "prompt engineering", "проверь промпт"
+Use when: "напиши промпт", "улучши промпт", "prompt engineering", "проверь промпт" — an LLM
+prompt, system prompt, subagent instruction, or tool description is written, improved, or reviewed,
+including prompts embedded in application or bot code.
+Skill files use `skill-master` instead.
 
 Treat a prompt as a clear task contract. Add information that changes the result; do not add a
 technique merely because it is common in prompt-engineering guides.
@@ -66,15 +69,14 @@ what a correct result means and use representative normal, edge, and adversarial
 match the real task. Compare old and new versions on the same scenarios. Treat a metaprompt or
 model self-critique as a source of hypotheses, not as proof that a revision is better.
 
-After creating or changing a prompt, run the review waves for it under the shared reviewer contract
-`skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
-"Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
-live there. Wave 1 is a fresh `fw-prompt-reviewer` (autoloads `prompt-master`) with the prompt
-location, required result and output contract, input sources, trust boundaries, model
-capabilities, and callers; after an authorized fix changes the prompt, the next wave reviews the
-revised version with a fresh reviewer.
+After creating or changing a prompt, run one review stage with a fresh `fw-prompt-reviewer`
+(autoloads `prompt-master`). Supply the prompt location, required result and output contract, input
+sources, trust boundaries, model capabilities, callers, validation evidence, and a short explanation
+of what changed, how the prompt works, why this approach was chosen, deliberate limits, and
+assumptions. The reviewer verifies that explanation and may challenge the chosen approach or
+propose a more useful alternative within prompt quality and safety. Include reviewers required by
+other active skills in the same stage.
 
-Findings are diagnoses for agreed normal behavior: apply only an authorized local correction to the
-agreed prompt. After the last wave, make only remaining local corrections within the agreed prompt,
-perform applicable direct evaluation, and report any remaining findings or required user
-decisions.
+After the review, apply no finding and do not repeat it automatically. Explain what you changed and
+how the prompt works, then what the reviewer found, what it can cause, whether you agree and why,
+and what you recommend. Wait for the user's approval before editing.

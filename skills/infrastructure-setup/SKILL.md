@@ -9,7 +9,9 @@ description: Infra, Docker, CI/CD, deploy, monitoring, backups; "настрой 
 
 Use when: "настрой инфраструктуру", "измени CI/CD", "подготовь деплой", "настрой Docker",
 "собери release artifact", "настрой мониторинг", "проверь инфраструктуру", "оцени деплой",
-"setup infrastructure", "review infrastructure"
+"setup infrastructure", "review infrastructure" — infrastructure is set up, changed, deployed,
+or assessed, including preparing a deploy, publishing a build or extension, and adding a health
+check or alert.
 Do NOT use for: choosing or writing application tests without an infrastructure change.
 
 ## Scope and Judgment
@@ -85,19 +87,13 @@ incident behavior, notification routing, installation, and drills.
   publication, recovery, retention, monitoring, or shared-host boundaries. A trivial local or
   formatting-only change whose result is fully established by direct verification does not need a
   dedicated review. Supply the requested review boundary, relevant existing infrastructure,
-  Project Knowledge, applicable topic references, and available runtime evidence.
-- When a dedicated review is required, run the review waves for the requested boundary under the
-  shared reviewer contract `skill://methodology/references/reviewer-contract.md` ("Review waves";
-  "Findings are diagnoses, not a work queue") — wave counts, stop rules, and findings dispositions
-  live there. Wave 1 reviews the requested current-infrastructure or completed-change boundary with
-  a fresh `fw-infra-reviewer`; after an authorized correction changes the reviewed result,
-  re-verify the affected boundary, refresh durable Project Knowledge facts, and run the next wave
-  with a fresh `fw-infra-reviewer`.
-- Findings are diagnoses for agreed normal operation. The material areas here are delivery,
-  recovery, monitoring, isolation, persistent state, infrastructure entities, dependencies,
-  architecture, and material complexity: apply only an authorized local correction, reject a
-  material or rare and unagreed one with a short reason or ask the user before editing, and report
-  unsupported or unrelated findings without acting on them.
-- After the final permitted wave, if a remaining local correction is made inside the agreed change,
-  verify its affected boundary directly and refresh durable Project Knowledge facts. Report any
-  remaining risks or required user decisions.
+  Project Knowledge, applicable topic references, available runtime evidence, and, for completed
+  work, a short explanation of what changed, how the operational result works, why this approach
+  was chosen, deliberate limits, and assumptions. Include reviewers required by other active skills
+  in the same review stage.
+- After the reviewer returns, apply no finding and do not repeat the review automatically. Explain
+  what you changed and how the operational result works, then what the reviewer found, what it can
+  cause, whether you agree and why, and what you recommend. Surface critical production, security,
+  or data-loss risks even when you disagree, and wait for the user's approval before editing. After
+  an approved infrastructure change, verify the affected boundary directly and refresh durable
+  Project Knowledge facts.

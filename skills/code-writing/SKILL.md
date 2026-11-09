@@ -34,9 +34,9 @@ For creating a user-spec → user-spec-planning skill.
    reusable code, and establish the smallest useful baseline check. Inspect generated, lock,
    snapshot, or other mechanical artifacts through their generator, relevant diff, and
    deterministic validation rather than an unhelpful full read.
-4. Discuss the approach before editing only when evidence exposes a substantive fork, risk, or
-   scope decision. Otherwise choose the smallest safe implementation that follows project or
-   framework conventions.
+4. Before editing non-trivial work not covered by an approved user-spec or user-approved plan,
+   briefly explain in simple user-facing language how the result will work end to end and why this
+   is the simplest sufficient approach, then wait for approval.
 5. Treat a new idea, risk, edge case, or opportunity discovered during implementation or review
    as a proposal, not authorization. A rare or unagreed scenario is a user decision even when its
    correction looks local. Correct autonomously only an authorized local defect in agreed normal
@@ -53,8 +53,9 @@ For creating a user-spec → user-spec-planning skill.
 3. Let straightforward code explain itself. Comment only when code cannot communicate the reason
    for a business rule, safety invariant, external constraint, compatibility workaround,
    deliberate tradeoff, or required ordering.
-4. When the change can alter observable behavior, apply `test-master` to select and run the
-   protecting tests. If it has no test subject, state that instead of creating artificial
+4. Apply `test-master` only to deterministic executable behavior or another explicit deterministic
+   contract. For LLM-produced results, presentation-only layout, or freely editable copy, use agent,
+   manual, or visual verification instead. If there is no test subject, do not create artificial
    assertions.
 5. Run the smallest supported lint, format, type, build, render, and user-requested checks that
    cover the change. Use a project-wide command only when it is the available entrypoint or the
@@ -62,25 +63,24 @@ For creating a user-spec → user-spec-planning skill.
 
 ## Run Fresh Reviews
 
-After every completed implementation, run the review waves for this change under the shared
-reviewer contract `skill://methodology/references/reviewer-contract.md` ("Review waves";
-"Findings are diagnoses, not a work queue"): wave counts, the complete-set-in-one-wave mechanics,
-stop rules, and findings dispositions live there.
+After every completed implementation, launch one fresh review stage with the complete applicable
+reviewer set in parallel against the same revision. Include reviewers required by other active
+skills in that stage instead of starting a separate review sequence.
 
-The waves launch the complete reviewer set selected for the implementation in parallel against the
-same revision: always a fresh `fw-code-reviewer` (autoloads `code-reviewing`; never set a model in
-the call, the runtime resolves it from configuration) whose review scope matches the change — a
+Always include a fresh `fw-code-reviewer` (autoloads `code-reviewing`; never set a model in the
+call, the runtime resolves it from configuration) whose review scope matches the change — a
 localized edit gets focused connected context, a broad change gets all affected contracts and
 architecture — plus `fw-security-reviewer` (autoloads `security-auditor`) when a security boundary
 changed or the user requested a security review, and the `fw-test-reviewer` that `test-master` owns
-when meaningful test code changed, included in every wave for this implementation. Give each
-reviewer the user request or user-spec, applicable repository instructions, validation evidence,
-every touched source file with relevant callers and dependencies, deleted or renamed file evidence,
-and generator/diff/validation evidence for mechanical artifacts.
+when meaningful test code changed. Give each reviewer the user request or user-spec, applicable
+repository instructions, validation evidence, every touched source file with relevant callers and
+dependencies, deleted or renamed file evidence, generator/diff/validation evidence for mechanical
+artifacts, and a short explanation of what changed, how the result works, why this approach was
+chosen, deliberate limits, and assumptions. The reviewer verifies that explanation against the
+request, project evidence, and code rather than accepting it as fact.
 
-Findings are diagnoses for agreed normal behavior: apply only an authorized local correction, and
-reject unsupported findings with evidence and report unrelated findings without expanding the task.
-Corrections between waves are authorized local defects that need no user decision, each followed by
-rerunning the affected direct checks. After the last wave, hand off the remaining findings and
-required decisions about scope, behavior, approach, or material complexity, briefly explaining
-rejected rare findings.
+After reviewers return, apply no finding and do not repeat the review automatically. Explain what
+you implemented and how it works, then what reviewers found, what it can cause, whether you agree
+and why, and what you recommend. Group related points, avoid internal process terms, and wait for
+the user's approval before editing. After approved corrections, rerun the affected direct checks
+and a fresh review stage only when another review is warranted.

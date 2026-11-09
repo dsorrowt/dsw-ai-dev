@@ -113,18 +113,18 @@ Do not search for `user-spec.md` or require it outside feature-finalization mode
 
 ## Documentation Review
 
-1. Run the review waves for the touched documents under the shared reviewer contract
-   `skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
-   "Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
-   live there. Wave 1 is a fresh `fw-docs-reviewer` (autoloads `documentation-writing`) with the
-   complete touched documents, the selected evidence boundary, related code and contracts, and the
-   user's request; it returns its JSON result directly, and a later wave re-reviews the corrected
-   documentation with a fresh reviewer.
-2. Findings are diagnoses for agreed normal documentation: apply only an authorized local
-   correction. Surface unrelated pre-existing defects without changing them.
-3. After the final permitted wave, make only remaining local corrections inside the requested
-   documentation change, run the applicable direct checks, and show the user any remaining findings
-   or required decisions.
+After documentation edits, run one review stage with a fresh `fw-docs-reviewer` (autoloads
+`documentation-writing`) with no model override. Give it the complete touched documents, the
+selected evidence boundary, related code and contracts, the user's request, and a short explanation
+of what changed, how the documented result works, why this approach was chosen, deliberate limits,
+and assumptions. Include reviewers required by other active skills in this same stage.
+
+The reviewer verifies that explanation against the evidence and may challenge the documentation's
+accuracy, structure, complexity, or chosen approach and propose an alternative within its lane.
+After it returns, apply no finding and do not repeat the review automatically. Explain what you
+changed and how the documented result works, then what the reviewer found, what it can cause,
+whether you agree and why, and what you recommend. Wait for the user's approval before editing.
+Surface unrelated pre-existing defects without changing them.
 
 ## Feature Finalization Mode
 

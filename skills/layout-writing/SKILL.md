@@ -30,6 +30,11 @@ decisions from project evidence, and works at relevant widths in the existing co
    a Figma link names only a file, substitution of a required missing font or asset, or expansion
    beyond the requested scope.
 
+Before editing a non-trivial layout whose intended appearance is not defined by an approved
+user-spec, an exact visual source, or a user-approved plan, briefly describe in simple user-facing
+language how the result will look and behave at relevant screen sizes and why it fits the existing
+project style, then wait for approval.
+
 Treat a new requirement, state, edge case, or improvement discovered during implementation or
 review as a proposal, not authorization. If it changes the agreed presentation, behavior, scope,
 approach, or material complexity, explain it and get the user's decision first. Correct
@@ -64,23 +69,19 @@ behavior; use both for mixed work.
 
 ## Review and Hand Off
 
-After every implementation, run the review waves for the result under the shared reviewer contract
-`skill://methodology/references/reviewer-contract.md`, sections "Review waves" and
-"Findings are diagnoses, not a work queue" — wave counts, stop rules, and findings dispositions
-live there. Wave 1 is one fresh `fw-layout-reviewer` (autoloads `layout-reviewing`); after an
-authorized correction changes the reviewed result, recapture the affected evidence and run the
-next wave with a fresh reviewer. Pass
-the request, scope, changed files, applicable repository instructions and project-pattern
-evidence, source mode and responsibility boundary, all checked widths, site images for every
-checked block and state, source and difference images where applicable, and the complete inventory
-and evidence set for a whole page or segmented tall block.
+After every implementation, run one review stage with one fresh `fw-layout-reviewer` (autoloads
+`layout-reviewing`) and no model override. Pass the request, scope, changed files, applicable
+repository instructions and project-pattern evidence, source mode and responsibility boundary,
+all checked widths, site images for every checked block and state, source and difference images
+where applicable, the complete inventory and evidence set for a whole page or segmented tall block,
+and a short explanation of what changed, how the layout behaves, why this approach was chosen,
+deliberate limits, and assumptions. Include reviewers required by other active skills in the same
+stage rather than starting a separate review sequence.
 
-Findings are diagnoses for agreed normal presentation; the material areas here are behavior,
-state, markup states, component contracts, architecture, and material complexity. Apply only an
-authorized local correction, and do not start a wave only for a finding that awaits the user's
-decision. After the last wave, correct remaining local mismatches inside the agreed presentation,
-recapture and inspect the affected widths and states, and report any remaining findings or
-required user decisions.
+After reviewers return, do not change the layout from their findings or repeat the review
+automatically. Explain what you changed and how the layout behaves, then what reviewers found, what
+it can cause, whether you agree and why, and what you recommend. Wait for the user's approval;
+recapture and directly inspect affected widths and states after approved changes.
 
-Hand off with the change summary, checks run, widths and blocks actually verified, finding
-dispositions, and known evidence limitations.
+Hand off with the change summary, checks run, widths and blocks actually verified, reviewer
+findings and your assessment, and known evidence limitations.

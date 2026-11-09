@@ -125,8 +125,8 @@ improvement, or pyramid preference without concrete impact is not a finding.
 - `minor` — it can break a real secondary behavior or has a concrete but narrowly limited
   consequence.
 
-This is the one shared severity scale of the reviewer contract
-(`skill://methodology/references/reviewer-contract.md`); a role never invents its own scale.
+This is a domain severity scale for reporting; the shared reviewer contract does not require
+severity, and a role never invents a scale outside its lane.
 
 ---
 

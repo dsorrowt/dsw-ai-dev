@@ -8,7 +8,9 @@ description: Guides skill creation and updates; "создай скилл"; not v
 ## When to Use
 
 Use when: "создай скилл", "измени скилл", "гайд по скиллам", "обнови скилл", "улучши скилл",
-"create skill", "update skill", "skill guide", "new skill", "how to write a skill"
+"create skill", "update skill", "skill guide", "new skill", "how to write a skill" — a skill is
+changed or evaluated, including proposing a change, diagnosing why a skill did not trigger, and
+fixing its description or rules. Use instead of a generic skill-creator.
 
 Do NOT use for updating, re-fetching, or restoring a vendored skill from its upstream source —
 use `update-skills` instead.
@@ -54,6 +56,12 @@ For a new skill or major change, reuse the request and project facts to establis
 scope, and required output. If a material design decision remains unresolved, run the adaptive
 interview from [interview-guide.md](references/interview-guide.md) — question admission, stopping
 rule, and handling decisions the user cannot answer. Otherwise proceed without an interview.
+
+Before creating or materially changing a skill without an approved user-spec or user-approved
+plan, briefly explain in simple user-facing language how the skill will behave from activation to
+result, including any user checkpoints, and why this is the simplest sufficient design; then wait
+for approval. Show the user the exact text of every skill change, however small, and edit only
+after approval.
 
 ## 2. Skill Structure
 
@@ -251,8 +259,15 @@ accept/reject behavior.
 
 ### Generalize and Explain Why
 
-Write a draft, then remove instructions that do not change the outcome. Generalize from realistic
-usage instead of adding branches for isolated examples or hypothetical future configurations.
+Treat an incident as evidence, not as a rule template. Remove its names, artifacts, and exact
+sequence; if no reusable decision remains across multiple realistic uses, fix the execution or
+local artifact instead of changing the skill. Keep incident-specific guidance only for an
+established contract or a security, authorization, data-loss, or irreversible-action boundary.
+
+Refer to the person the skill serves as "the user" and keep their personal facts (name, accounts,
+home-directory paths) in the project's documented context, such as Project Knowledge, not in skill
+text: skills are reused across projects and people, and a hardcoded owner makes them wrong or
+leaky elsewhere.
 
 Prefer positive instructions when they fully convey the rule. Keep explicit negatives for
 security, irreversible damage, disambiguation, and scope boundaries.
@@ -279,8 +294,8 @@ reviewer.
 
 ### Run Applicable Reviewers
 
-Launch fresh skeptical reviewers according to what changed. Each applies the evidence gate and
-common JSON contract from the `methodology` skill's reviewer contract
+Launch fresh skeptical reviewers according to what changed. Each follows the common reviewer
+contract from the `methodology` skill
 (`skill://methodology/references/reviewer-contract.md`); orchestrator mechanics are in
 [agents.md → Reviewer contract](references/agents.md):
 
@@ -293,11 +308,24 @@ branching changes, and `fw-skill-simplicity-reviewer` when changing rules, phase
 scripts, options, or references. Run all three in parallel for a new skill or a major rewrite. Do
 not run an unaffected lane merely to satisfy ceremony.
 
-Provide the user scope, touched artifacts, relevant references and contracts, and validation
-evidence. Findings are diagnoses for agreed normal behavior under the shared reviewer contract
-`skill://methodology/references/reviewer-contract.md` ("Findings are diagnoses, not a work queue") —
-apply only an authorized local correction and reject or ask the user before a material or rare and
-unagreed one. Orchestrator mechanics are in
-[agents.md → Orchestrator responsibilities](references/agents.md).
+Provide the user scope, touched artifacts, relevant references and contracts, validation evidence,
+and a short explanation of what changed, how the skill will affect agent behavior, why this
+approach was chosen, deliberate limits, and assumptions. Reviewers may challenge the chosen
+approach or propose alternatives within their lane. After reviewers return, apply no finding and
+do not repeat the review automatically. Explain what changed in the skill and how it will affect
+agent behavior, then what reviewers found, what it can cause, whether you agree and why, and what
+you recommend. Wait for the user's approval before editing.
 
 All three are defined under `~/.omp/agent/agents/` and autoload `skill-master`.
+
+### Check Triggering
+
+After applying a description change that affects routing, check it in fresh sessions; the
+authoring session already holds the skill in context and hides gaps. From the directory where each
+would normally be asked, run the request that exposed the miss, one or two realistic requests
+(including one where the skill is a step of a larger task), and one near-miss that belongs to a
+neighboring skill. Repeat the request that exposed the miss a few times.
+
+Report which skill each run loaded and how it ended. A run that ended with an API or authentication
+error did not test routing: stop and tell the user instead of counting it as a miss. Routing is
+probabilistic: report the results to the user as evidence, not as a guarantee.

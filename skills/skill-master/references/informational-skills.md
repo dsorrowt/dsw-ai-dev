@@ -25,7 +25,7 @@ For skills that describe HOW to do something (analysis, review, audit):
 What to analyze: SQL injection, XSS, CSRF, authentication...
 
 ## Risk Assessment
-How to classify findings: `critical`, `major`, `minor` — the shared reviewer-contract scale, never a custom one
+How to classify findings: `critical`, `major`, `minor` — a domain reporting scale, not a required contract field
 
 ## Operational Protocol
 Input requirements, analysis methodology, quality assurance

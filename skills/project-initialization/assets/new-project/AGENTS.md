@@ -9,6 +9,11 @@
 
 - For multi-step tasks, track progress with the session's task-list tool.
 
+## Project Context
+
+- Load the `project-knowledge` skill before changing, debugging, or explaining how this project
+  works: its code, configuration, skills, agents, or pipelines.
+
 ## Task Scope
 
 - The user's request and any explicitly approved plan define the authorized scope of work.
@@ -19,6 +24,10 @@
 ## Worktrees
 
 - Worktrees are created by orca. The agent does not request task isolation and does not create Git worktrees or extra project copies on its own initiative; creating a worktree via the `orca` CLI on an explicit user request or from an orca handoff is allowed.
+
+## Git
+
+- **Default branch:** `[main | dev]`
 
 ## Security
 

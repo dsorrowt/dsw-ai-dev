@@ -44,13 +44,13 @@ The installer creates no manifest or ledger: the source tree is the only state. 
 | **Plan**      | `user-spec-planning`                                                                      | specification, interview log, code research              | the user approves the spec after `fw-uspec-quality`, `fw-uspec-adequacy`, and `fw-skeptic` review it |
 | **Implement** | `code-writing`, `layout-writing`, `infrastructure-setup`, `prompt-master`, `skill-master` | only the agreed changes                                  | observable behavior matches the specification                                                        |
 | **Verify**    | `test-master` and the appropriate smoke/integration/unit boundary                         | evidence of the result                                   | the changed path has actually been exercised                                                         |
-| **Review**    | `code-reviewing` and fresh `fw-*` reviewers                                               | evidence-gated findings                                  | no material finding remains unaddressed                                                              |
+| **Review**    | `code-reviewing` and fresh `fw-*` reviewers                                               | review-stage findings explained to the user              | approved corrections applied; no silent edits                                                       |
 | **Finalize**  | `documentation-writing`                                                                   | current Project Knowledge and archived feature artifacts | documentation matches the code                                                                       |
 
 
 Three sources of truth stay separate: the approved `user-spec.md` defines the expected feature
 outcome, Project Knowledge stores durable project facts, and code owns implementation details. A
-finding is a diagnosis, not an automatically generated task.
+finding is a diagnosis: the agent explains it, and the user approves any correction.
 
 ## Installation and safety
 
