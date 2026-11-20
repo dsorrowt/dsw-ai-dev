@@ -67,6 +67,32 @@ behavior; use both for mixed work.
 5. Correct confirmed mismatches and repeat only affected blocks and widths with new output paths.
    Run the smallest project check that proves the changed route still compiles or renders.
 
+## Live Variant Mode
+
+Optional, and only when the person is present in a browser: pick an element, generate variants,
+accept one and it lands in source. It does not replace the capture procedure above; it precedes a
+normal capture-and-review when the direction is still open. Needs the global `impeccable` skill.
+
+```bash
+IMPECCABLE_LIVE_COPY_AGENT=chat <skill-base>/scripts/impeccable live \
+  --allow-missing-context --dev-url --auto-config
+```
+
+- `chat` keeps Apply inside this session. The default `auto` falls back to the `codex` or `claude`
+  CLI with approvals and sandboxing off once nothing has polled for a minute, which also walks
+  around this repository's hooks.
+- `--allow-missing-context` boots without `PRODUCT.md`/`DESIGN.md`; `contextMissing` in the output
+  is informational. Design context stays in Project Knowledge instead of new root files.
+- Open the URL the boot reports: `pageUrls[0]` for a static folder, `devUrl` for a running dev
+  server. Start `devCommand` yourself only when nothing answers on it.
+- Service the poll as a supervised long-lived process with notification, never as a one-shot
+  command: `live-poll` with its default long timeout, notify on
+  `"type":"(generate|steer|accept|discard|manual_edit_apply|variant_mount_failed|exit)"`, and on
+  each event follow `skill://impeccable/reference/live.md`, then
+  `live-poll --reply <event-id> <status>` and poll again immediately.
+- Stop with `impeccable live-server stop`. `.impeccable/` is private state, gitignored by the boot
+  and safe to delete; the only other footprint is a marked block appended to `.gitignore`.
+
 ## Review and Hand Off
 
 After every implementation, run one review stage with one fresh `fw-layout-reviewer` (autoloads
